@@ -1,8 +1,11 @@
 defmodule InkWeb.PageControllerTest do
   use InkWeb.ConnCase
 
-  test "GET /", %{conn: conn} do
+  test "GET / renders the canvas LiveView", %{conn: conn} do
     conn = get(conn, ~p"/")
-    assert html_response(conn, 200) =~ "Peace of mind from prototype to production"
+    html = html_response(conn, 200)
+    assert html =~ "Real-time canvas"
+    assert html =~ "ink-canvas"
+    assert html =~ "phx-hook=\"CanvasDraw\""
   end
 end

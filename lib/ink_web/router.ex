@@ -17,7 +17,8 @@ defmodule InkWeb.Router do
   scope "/", InkWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", CanvasLive
+    live "/canvas", CanvasLive
   end
 
   # Other scopes may use custom stacks.
