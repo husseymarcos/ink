@@ -1,7 +1,3 @@
-/**
- * Canvas hook using Phoenix Channel for real-time broadcast.
- * Connects to "canvas:shared", pushes "draw" and listens for "draw_point".
- */
 import { Socket } from "phoenix"
 
 export const CanvasDraw = {
@@ -10,13 +6,23 @@ export const CanvasDraw = {
     this.ctx = this.canvas.getContext("2d")
     this.drawing = false
 
+    const roomId = this.el.dataset.roomId
+    if (!roomId) return
+
     const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content")
     const socket = new Socket("/socket", { params: { _csrf_token: csrfToken } })
     socket.connect()
 
-    const channel = socket.channel("canvas:shared", {})
+    const channel = socket.channel(`canvas:room:${roomId}`, {})
     channel.join()
-      .receive("ok", () => {})
+      .receive("ok", (resp) => {
+        const points = (resp && resp.points) ? resp.points : []
+        if (Array.isArray(points)) {
+          for (const p of points) {
+            this.drawPoint(p.x, p.y)
+          }
+        }
+      })
       .receive("error", (resp) => console.error("Canvas channel join failed", resp))
 
     channel.on("draw_point", ({ x, y }) => {

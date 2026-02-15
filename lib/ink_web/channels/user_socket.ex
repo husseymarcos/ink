@@ -1,7 +1,7 @@
 defmodule InkWeb.UserSocket do
   use Phoenix.Socket
 
-  channel "canvas:shared", InkWeb.CanvasChannel
+  channel "canvas:room:*", InkWeb.CanvasChannel
 
   @impl true
   def connect(_params, socket, _connect_info) do

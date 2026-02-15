@@ -12,6 +12,7 @@ defmodule Ink.Application do
       Ink.Repo,
       {DNSCluster, query: Application.get_env(:ink, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Ink.PubSub},
+      Ink.CanvasStore,
       # Start a worker by calling: Ink.Worker.start_link(arg)
       # {Ink.Worker, arg},
       # Start to serve requests, typically the last entry
