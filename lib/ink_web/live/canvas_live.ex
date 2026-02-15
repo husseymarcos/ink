@@ -31,8 +31,7 @@ defmodule InkWeb.CanvasLive do
             class="inline-flex items-center gap-2 rounded-lg bg-base-100/90 px-3 py-2 text-sm font-medium text-base-content shadow-sm backdrop-blur-sm transition hover:bg-base-200 focus:ring-2 focus:ring-primary disabled:pointer-events-none disabled:opacity-50"
             title="Deshacer (⌘Z)"
           >
-            <.icon name="hero-arrow-uturn-left" class="h-4 w-4" />
-            Deshacer
+            <.icon name="hero-arrow-uturn-left" class="h-4 w-4" /> Deshacer
           </button>
         </div>
         <div class="absolute inset-0 bg-base-100">
