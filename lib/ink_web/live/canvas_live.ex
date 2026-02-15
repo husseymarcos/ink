@@ -18,20 +18,30 @@ defmodule InkWeb.CanvasLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-      <div class="flex flex-col items-center gap-4 py-8">
-        <h1 class="text-2xl font-semibold text-base-content">Real-time canvas</h1>
-        <p class="text-sm text-base-content/70">
-          Click and drag to draw. Share the URL so others see the same room.
-        </p>
-        <div class="border-2 border-base-300 rounded-lg overflow-hidden bg-white shadow-lg">
+      <div class="fixed inset-0 z-50 flex flex-col bg-base-100" data-canvas-container>
+        <div class="pointer-events-none absolute left-0 top-0 z-20 flex items-center gap-3 p-3">
+          <span class="rounded bg-base-100/90 px-2 py-1 text-sm font-mono text-base-content shadow-sm backdrop-blur-sm">
+            {@room_id}
+          </span>
+        </div>
+        <div class="pointer-events-auto absolute right-0 top-0 z-20 p-3">
+          <button
+            type="button"
+            data-canvas-undo
+            class="inline-flex items-center gap-2 rounded-lg bg-base-100/90 px-3 py-2 text-sm font-medium text-base-content shadow-sm backdrop-blur-sm transition hover:bg-base-200 focus:ring-2 focus:ring-primary disabled:pointer-events-none disabled:opacity-50"
+            title="Deshacer (⌘Z)"
+          >
+            <.icon name="hero-arrow-uturn-left" class="h-4 w-4" />
+            Deshacer
+          </button>
+        </div>
+        <div class="absolute inset-0 bg-base-100">
           <canvas
             id="ink-canvas"
             phx-hook="CanvasDraw"
             phx-update="ignore"
             data-room-id={@room_id}
-            width="800"
-            height="500"
-            class="cursor-crosshair block touch-none"
+            class="h-full w-full cursor-crosshair touch-none"
           >
           </canvas>
         </div>

@@ -7,8 +7,8 @@ defmodule InkWeb.PageControllerTest do
     room_path = redirected_to(conn)
     conn = get(conn, room_path)
     html = html_response(conn, 200)
-    assert html =~ "Real-time canvas"
     assert html =~ "ink-canvas"
     assert html =~ "phx-hook=\"CanvasDraw\""
+    assert html =~ "Deshacer"
   end
 end
