@@ -7,7 +7,11 @@ defmodule Ink.CanvasStore do
 
   def get_strokes(room_id), do: GenServer.call(__MODULE__, {:get_strokes, room_id})
 
-  def start_stroke(room_id), do: GenServer.cast(__MODULE__, {:start_stroke, room_id})
+  def get_last_stroke_color(room_id),
+    do: GenServer.call(__MODULE__, {:get_last_stroke_color, room_id})
+
+  def start_stroke(room_id, color \\ nil),
+    do: GenServer.cast(__MODULE__, {:start_stroke, room_id, color})
 
   def add_point(room_id, x, y), do: GenServer.cast(__MODULE__, {:add_point, room_id, x, y})
 
@@ -23,19 +27,29 @@ defmodule Ink.CanvasStore do
   end
 
   @impl true
+  def handle_call({:get_last_stroke_color, room_id}, _from, state) do
+    color =
+      case Map.get(state, room_id, []) do
+        [] -> Ink.Canvas.default_color()
+        strokes -> Map.get(List.last(strokes), :color, Ink.Canvas.default_color())
+      end
+
+    {:reply, color, state}
+  end
+
+  @impl true
   def handle_call({:undo, room_id}, _from, state) do
     strokes = Map.get(state, room_id, [])
-    cutoff = System.system_time(:millisecond) - @undo_window_ms
-    kept = Ink.Canvas.remove_strokes_after(strokes, cutoff)
+    kept = Ink.Canvas.remove_last_time_window(strokes, @undo_window_ms)
     new_state = Map.put(state, room_id, kept)
     {:reply, {:ok, Ink.Canvas.to_points(kept)}, new_state}
   end
 
   @impl true
-  def handle_cast({:start_stroke, room_id}, state) do
+  def handle_cast({:start_stroke, room_id, color}, state) do
     new_state =
       Map.update(state, room_id, [], fn strokes ->
-        Ink.Canvas.start_stroke(strokes)
+        Ink.Canvas.start_stroke(strokes, color || Ink.Canvas.default_color())
       end)
 
     {:noreply, new_state}
@@ -44,9 +58,14 @@ defmodule Ink.CanvasStore do
   @impl true
   def handle_cast({:add_point, room_id, x, y}, state) do
     new_state =
-      Map.update(state, room_id, [%{points: [], created_at: nil}], fn strokes ->
-        Ink.Canvas.add_point(strokes, x, y)
-      end)
+      Map.update(
+        state,
+        room_id,
+        [%{points: [], created_at: nil, color: Ink.Canvas.default_color()}],
+        fn strokes ->
+          Ink.Canvas.add_point(strokes, x, y)
+        end
+      )
 
     {:noreply, new_state}
   end

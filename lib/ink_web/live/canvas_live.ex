@@ -1,9 +1,24 @@
 defmodule InkWeb.CanvasLive do
   use InkWeb, :live_view
 
+  @palette [
+    "#1e293b",
+    "#dc2626",
+    "#ea580c",
+    "#ca8a04",
+    "#16a34a",
+    "#0891b2",
+    "#3b82f6",
+    "#7c3aed",
+    "#db2777",
+    "#ffffff"
+  ]
+
   @impl true
   def mount(params, _session, socket) do
     socket = assign(socket, :page_title, "Canvas")
+    socket = assign(socket, :current_color, Ink.Canvas.default_color())
+    socket = assign(socket, :palette, @palette)
 
     case params do
       %{"room_id" => room_id} ->
@@ -34,12 +49,38 @@ defmodule InkWeb.CanvasLive do
             <.icon name="hero-arrow-uturn-left" class="h-4 w-4" /> Deshacer
           </button>
         </div>
+        <div class="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex justify-center p-3">
+          <div
+            class="flex flex-wrap justify-center gap-1.5 rounded-xl bg-base-100/95 p-2 shadow-lg shadow-black/10 backdrop-blur-sm"
+            role="group"
+            aria-label="Paleta de colores"
+          >
+            <%= for color <- @palette do %>
+              <button
+                type="button"
+                phx-click="select_color"
+                phx-value-color={color}
+                class={[
+                  "h-8 w-8 shrink-0 rounded-lg border-2 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-base-100",
+                  if(@current_color == color,
+                    do: "scale-110 border-base-content shadow-md",
+                    else: "border-transparent hover:scale-105 hover:shadow"
+                  )
+                ]}
+                style={"background-color: #{color}; box-shadow: #{if(color == "#ffffff", do: "inset 0 0 0 1px rgba(0,0,0,0.15)", else: "none")}"}
+                title={color}
+              >
+              </button>
+            <% end %>
+          </div>
+        </div>
         <div class="absolute inset-0 bg-base-100">
           <canvas
             id="ink-canvas"
             phx-hook="CanvasDraw"
             phx-update="ignore"
             data-room-id={@room_id}
+            data-default-color={Ink.Canvas.default_color()}
             class="h-full w-full cursor-crosshair touch-none"
           >
           </canvas>
@@ -47,6 +88,16 @@ defmodule InkWeb.CanvasLive do
       </div>
     </Layouts.app>
     """
+  end
+
+  @impl true
+  def handle_event("select_color", %{"color" => color}, socket) do
+    socket =
+      socket
+      |> assign(:current_color, color)
+      |> push_event("set_color", %{color: color})
+
+    {:noreply, socket}
   end
 
   defp random_slug do

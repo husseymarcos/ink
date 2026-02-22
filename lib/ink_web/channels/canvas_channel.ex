@@ -9,9 +9,10 @@ defmodule InkWeb.CanvasChannel do
   end
 
   @impl true
-  def handle_in("start_stroke", _params, socket) do
+  def handle_in("start_stroke", params, socket) do
     room_id = socket.assigns.room_id
-    Ink.CanvasStore.start_stroke(room_id)
+    color = params["color"]
+    Ink.CanvasStore.start_stroke(room_id, color)
     {:noreply, socket}
   end
 
@@ -21,7 +22,15 @@ defmodule InkWeb.CanvasChannel do
     strokes = Ink.CanvasStore.get_strokes(room_id)
     stroke_start = stroke_start?(strokes)
     Ink.CanvasStore.add_point(room_id, x, y)
-    broadcast!(socket, "draw_point", %{"x" => x, "y" => y, "stroke_start" => stroke_start})
+    color = Ink.CanvasStore.get_last_stroke_color(room_id)
+
+    broadcast!(socket, "draw_point", %{
+      "x" => x,
+      "y" => y,
+      "stroke_start" => stroke_start,
+      "color" => color
+    })
+
     {:noreply, socket}
   end
 
@@ -47,6 +56,6 @@ defmodule InkWeb.CanvasChannel do
 
   defp stroke_start?(strokes) do
     last = List.last(strokes)
-    last == [] or last == nil
+    last == nil or last.points == []
   end
 end

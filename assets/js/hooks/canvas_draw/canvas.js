@@ -1,23 +1,23 @@
 const POINT_RADIUS = 4
-const STROKE_COLOR = "#3b82f6"
 
-
-export function drawPoint(ctx, x, y) {
+export function drawPoint(ctx, x, y, color) {
   if (!ctx) return
   const px = Number(x)
   const py = Number(y)
   ctx.beginPath()
   ctx.arc(px, py, POINT_RADIUS, 0, 2 * Math.PI)
-  ctx.fillStyle = STROKE_COLOR
+  ctx.fillStyle = color
   ctx.fill()
 }
 
-export function redrawAll(ctx, canvas, strokes, drawPointFn) {
+export function redrawAll(ctx, canvas, strokes, drawPointFn, defaultColor) {
   if (!ctx || !canvas) return
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   for (const stroke of strokes) {
-    for (const p of stroke) {
-      drawPointFn(p.x, p.y)
+    const points = stroke.points || stroke
+    const color = stroke.color || defaultColor
+    for (const p of points) {
+      drawPointFn(p.x, p.y, color)
     }
   }
 }

@@ -12,6 +12,10 @@ export const CanvasDraw = {
     const roomId = this.el.dataset.roomId
     if (!roomId) return
 
+    this.handleEvent("set_color", ({ color }) => {
+      if (color) this.currentColor = color
+    })
+
     this.channel = channel.connectChannel(roomId)
     channel.setupChannelHandlers(this.channel, this)
     pointer.setupPointerListeners(this.canvas, this)
@@ -31,6 +35,7 @@ export const CanvasDraw = {
     this.ctx = this.canvas.getContext("2d")
     this.drawing = false
     this.strokes = []
+    this.currentColor = this.el.dataset.defaultColor
   },
 
   _setupCanvas() {
@@ -46,12 +51,18 @@ export const CanvasDraw = {
     window.addEventListener("resize", this._boundResize)
   },
 
-  drawPoint(x, y) {
-    canvas.drawPoint(this.ctx, x, y)
+  drawPoint(x, y, color) {
+    canvas.drawPoint(this.ctx, x, y, color ?? this.currentColor)
   },
 
   redrawAll() {
-    canvas.redrawAll(this.ctx, this.canvas, this.strokes, (x, y) => this.drawPoint(x, y))
+    canvas.redrawAll(
+      this.ctx,
+      this.canvas,
+      this.strokes,
+      (x, y, color) => this.drawPoint(x, y, color),
+      this.currentColor
+    )
   },
 
   _getCoords(e) {
@@ -59,7 +70,9 @@ export const CanvasDraw = {
   },
 
   _replaceStrokes(strokes) {
-    this.strokes = Array.isArray(strokes) ? strokes : []
+    this.strokes = Array.isArray(strokes)
+      ? strokes.map((s) => (s && s.points ? s : { points: s, color: this.currentColor }))
+      : []
   },
 
   _updateUndoButton() {
@@ -73,15 +86,17 @@ export const CanvasDraw = {
     this._updateUndoButton()
   },
 
-  _onDrawPoint({ x, y, stroke_start }) {
+  _onDrawPoint({ x, y, stroke_start, color }) {
     const point = { x: Number(x), y: Number(y) }
+    const strokeColor = color || this.currentColor
     if (stroke_start) {
-      this.strokes.push([point])
+      this.strokes.push({ points: [point], color: strokeColor })
     } else {
-      if (this.strokes.length === 0) this.strokes.push([])
-      this.strokes[this.strokes.length - 1].push(point)
+      if (this.strokes.length === 0) this.strokes.push({ points: [], color: strokeColor })
+      const last = this.strokes[this.strokes.length - 1]
+      last.points.push(point)
     }
-    this.drawPoint(x, y)
+    this.drawPoint(x, y, strokeColor)
     this._updateUndoButton()
   },
 
@@ -102,7 +117,7 @@ export const CanvasDraw = {
   },
 
   _sendPoint(x, y, strokeStart) {
-    if (strokeStart) this.channel.push("start_stroke")
+    if (strokeStart) this.channel.push("start_stroke", { color: this.currentColor })
     this.drawPoint(x, y)
     this.channel.push("draw", { x, y })
   },
