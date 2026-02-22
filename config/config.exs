@@ -8,6 +8,7 @@
 import Config
 
 config :ink,
+  ash_domains: [Ink.Resources],
   ecto_repos: [Ink.Repo],
   generators: [timestamp_type: :utc_datetime]
 
