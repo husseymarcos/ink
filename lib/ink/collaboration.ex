@@ -62,6 +62,19 @@ defmodule Ink.Collaboration do
     end
   end
 
+  def update_room_name(%Room{} = room, %User{} = actor, name) when is_binary(name) do
+    if room.owner_id != actor.id do
+      {:error, :not_owner}
+    else
+      name = name |> String.trim()
+      name = if name == "", do: room.slug, else: name
+
+      room
+      |> Ecto.Changeset.change(%{name: name})
+      |> Repo.update()
+    end
+  end
+
   def share_room_with_email(%Room{} = room, %User{} = actor, email) when is_binary(email) do
     if room.owner_id != actor.id do
       {:error, :not_owner}

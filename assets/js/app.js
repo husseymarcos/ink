@@ -24,13 +24,14 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/ink"
 import {CanvasDraw} from "./hooks/canvas_draw.js"
+import {AutoDismissFlash} from "./hooks/auto_dismiss_flash.js"
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {CanvasDraw, ...colocatedHooks},
+  hooks: {CanvasDraw, AutoDismissFlash, ...colocatedHooks},
 })
 
 // Show progress bar on live navigation and form submits

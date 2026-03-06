@@ -1,15 +1,25 @@
 <Layouts.app flash={@flash} current_user={@current_user}>
   <div class="flex min-h-[70vh] flex-col items-center justify-center gap-6">
     <div class="text-center">
-      <img src={~p"/images/logo.png"} alt="Ink" class="mx-auto h-20 w-auto object-contain sm:h-24" />
+      <img
+        src={~p"/images/logo.png"}
+        alt="Ink"
+        class="mx-auto h-20 w-auto object-contain sm:h-24"
+      />
       <p class="mt-3 text-5xl font-black tracking-tight text-primary sm:text-6xl">Ink</p>
       <p class="mt-2 text-sm text-base-content/70">Inicia sesion para continuar</p>
     </div>
 
     <div class="mx-auto w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
       <.form for={@form} id="login-form" action={~p"/login"} method="post" class="space-y-4">
-        <.input field={@form[:email]} type="email" label="Email" required />
-        <.input field={@form[:password]} type="password" label="Password" required />
+        <.input field={@form[:email]} type="email" label="Email" autocomplete="username" required />
+        <.input
+          field={@form[:password]}
+          type="password"
+          label="Password"
+          autocomplete="current-password"
+          required
+        />
 
         <button type="submit" class="btn btn-primary w-full">
           Entrar

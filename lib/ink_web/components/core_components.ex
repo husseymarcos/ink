@@ -54,9 +54,18 @@ defmodule InkWeb.CoreComponents do
     <div
       :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
       id={@id}
-      phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
+      phx-click={
+        JS.push("lv:clear-flash", value: %{key: @kind})
+        |> JS.hide(
+          to: "##{@id}",
+          time: 200,
+          transition: {"transition-opacity ease-in duration-200", "opacity-100", "opacity-0"}
+        )
+      }
+      phx-hook="AutoDismissFlash"
+      data-timeout="4500"
       role="alert"
-      class="toast toast-top toast-end z-50"
+      class="toast toast-top toast-center z-50"
       {@rest}
     >
       <div class={[
