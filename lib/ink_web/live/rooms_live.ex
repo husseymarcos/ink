@@ -64,15 +64,6 @@ defmodule InkWeb.RoomsLive do
               <.icon name="hero-arrow-left-on-rectangle" class="h-4 w-4" />
               <span>Cerrar sesión</span>
             </.link>
-
-            <button
-              type="button"
-              phx-click="create_room"
-              class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-content shadow-sm transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-            >
-              <.icon name="hero-plus" class="h-4 w-4" />
-              <span>Nuevo room</span>
-            </button>
           </div>
         </header>
 
@@ -84,6 +75,15 @@ defmodule InkWeb.RoomsLive do
                 {length(@rooms)} {if length(@rooms) == 1, do: "room", else: "rooms"}
               </span>
             </div>
+
+            <button
+              type="button"
+              phx-click="create_room"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-content shadow-sm transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+            >
+              <.icon name="hero-plus" class="h-4 w-4" />
+              <span>Nuevo room</span>
+            </button>
           </div>
 
           <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
