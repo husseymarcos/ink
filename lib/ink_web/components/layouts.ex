@@ -31,44 +31,54 @@ defmodule InkWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :current_user, :map, default: nil, doc: "the current authenticated user"
+
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
+    <div class="min-h-screen bg-gradient-to-b from-base-200/60 via-base-200/20 to-base-100">
+      <header class="sticky top-0 z-40 border-b border-base-300/80 bg-base-100/80 backdrop-blur">
+        <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+          <.link href={~p"/"} class="inline-flex items-center gap-2">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-content">
+              <.icon name="hero-pencil-square" class="size-4" />
+            </div>
+            <span class="text-sm font-semibold tracking-tight">Ink</span>
+          </.link>
+
+          <div class="flex items-center gap-3">
             <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </header>
+            <span :if={@current_user} class="hidden text-sm text-base-content/70 sm:inline">
+              {@current_user.email}
+            </span>
+            <.link
+              :if={@current_user}
+              href={~p"/logout"}
+              method="delete"
+              class="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-content transition hover:opacity-90"
+            >
+              Salir
+            </.link>
+            <.link
+              :if={is_nil(@current_user)}
+              href={~p"/login"}
+              class="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-content transition hover:opacity-90"
+            >
+              Entrar
+            </.link>
+          </div>
+        </div>
+      </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
-      </div>
-    </main>
+      <main class="px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto w-full max-w-6xl space-y-4">
+          {render_slot(@inner_block)}
+        </div>
+      </main>
 
-    <.flash_group flash={@flash} />
+      <.flash_group flash={@flash} />
+    </div>
     """
   end
 

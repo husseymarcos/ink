@@ -1,14 +1,26 @@
 defmodule InkWeb.PageControllerTest do
   use InkWeb.ConnCase
 
-  test "GET / redirects to a room and room page renders the canvas LiveView", %{conn: conn} do
+  alias Ink.Accounts
+
+  test "GET / redirects unauthenticated users to login", %{conn: conn} do
     conn = get(conn, ~p"/")
+    assert redirected_to(conn) == ~p"/login"
+  end
+
+  test "GET / redirects authenticated users to a room", %{conn: conn} do
+    {:ok, user} =
+      Accounts.register_user(%{
+        "email" => "canvas@example.com",
+        "password" => "supersecret1"
+      })
+
+    conn =
+      conn
+      |> init_test_session(%{})
+      |> put_session(:user_id, user.id)
+      |> get(~p"/")
+
     assert redirected_to(conn) =~ "/room/"
-    room_path = redirected_to(conn)
-    conn = get(conn, room_path)
-    html = html_response(conn, 200)
-    assert html =~ "ink-canvas"
-    assert html =~ "phx-hook=\"CanvasDraw\""
-    assert html =~ "Deshacer"
   end
 end

@@ -5,6 +5,7 @@ defmodule InkWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
+    plug InkWeb.UserAuth, :fetch_current_user
     plug :put_root_layout, html: {InkWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
@@ -17,8 +18,17 @@ defmodule InkWeb.Router do
   scope "/", InkWeb do
     pipe_through :browser
 
-    live "/", CanvasLive, :index
-    live "/room/:room_id", CanvasLive, :room
+    get "/register", UserRegistrationController, :new
+    post "/register", UserRegistrationController, :create
+    get "/login", UserSessionController, :new
+    post "/login", UserSessionController, :create
+    delete "/logout", UserSessionController, :delete
+
+    live_session :authenticated,
+      on_mount: [{InkWeb.UserAuth, :require_authenticated_user}] do
+      live "/", CanvasLive, :index
+      live "/room/:room_id", CanvasLive, :room
+    end
   end
 
   if Application.compile_env(:ink, :dev_routes) do

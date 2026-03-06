@@ -1,11 +1,25 @@
 defmodule InkWeb.CanvasChannel do
   use Phoenix.Channel
 
+  alias Ink.Collaboration
+
   @impl true
-  def join("canvas:room:" <> room_id, _params, socket) do
-    socket = assign(socket, :room_id, room_id)
-    strokes = Ink.CanvasStore.get_strokes(room_id)
-    {:ok, %{"strokes" => strokes}, socket}
+  def join("canvas:room:" <> room_slug, _params, socket) do
+    user = socket.assigns.current_user
+
+    case Collaboration.get_room_by_slug(room_slug) do
+      nil ->
+        {:error, %{reason: "room_not_found"}}
+
+      room ->
+        if Collaboration.user_has_access?(room, user) do
+          socket = assign(socket, :room_id, room_slug)
+          strokes = Ink.CanvasStore.get_strokes(room_slug)
+          {:ok, %{"strokes" => strokes}, socket}
+        else
+          {:error, %{reason: "forbidden"}}
+        end
+    end
   end
 
   @impl true
