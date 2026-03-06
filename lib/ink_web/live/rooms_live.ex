@@ -2,6 +2,8 @@ defmodule InkWeb.RoomsLive do
   use InkWeb, :live_view
 
   alias Ink.Collaboration
+  alias Ink.CanvasStore
+  alias InkWeb.Presence
 
   @impl true
   def mount(_params, _session, socket) do
@@ -74,107 +76,120 @@ defmodule InkWeb.RoomsLive do
           </div>
         </header>
 
-        <div class="grid gap-6 md:grid-cols-2">
-          <section class="rounded-2xl bg-base-100 p-4 shadow-sm ring-1 ring-base-300/70">
-            <div class="flex items-center justify-between gap-2">
-              <h2 class="text-sm font-semibold text-base-content">Tus rooms</h2>
+        <section class="rounded-2xl bg-base-100 p-4 shadow-sm ring-1 ring-base-300/70">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-semibold text-base-content">Rooms</h2>
               <span class="rounded-full bg-base-200 px-2 py-0.5 text-xs font-medium text-base-content/70">
-                {length(@owned_rooms)} {if length(@owned_rooms) == 1, do: "room", else: "rooms"}
+                {length(@rooms)} {if length(@rooms) == 1, do: "room", else: "rooms"}
               </span>
             </div>
+          </div>
 
-            <div class="mt-3 space-y-2">
-              <div :if={@owned_rooms == []} class="rounded-xl border border-dashed border-base-300/80 bg-base-100/60 px-3 py-4 text-center text-xs text-base-content/70">
-                Aún no tienes rooms propios. Crea uno nuevo desde un enlace compartido o generando un room.
-              </div>
+          <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div
+              :if={@rooms == []}
+              class="col-span-full rounded-xl border border-dashed border-base-300/80 bg-base-100/60 px-3 py-4 text-center text-xs text-base-content/70"
+            >
+              Todavía no tienes rooms. Crea uno nuevo o espera a que alguien te comparta uno.
+            </div>
 
-              <div
-                :for={room <- @owned_rooms}
-                class="group relative overflow-hidden rounded-xl border border-base-300/70 bg-base-100/80 px-3 py-2 transition hover:border-primary/60 hover:bg-primary/5"
+            <div
+              :for={room <- @rooms}
+              class="group relative flex flex-col overflow-hidden rounded-2xl border border-base-300/80 bg-base-100/90 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md"
+            >
+              <.link
+                navigate={~p"/room/#{room.slug}"}
+                class="flex flex-1 flex-col"
               >
-                <div class="flex items-center justify-between gap-3">
-                  <.link
-                    navigate={~p"/room/#{room.slug}"}
-                    class="flex-1"
+                <div class="relative aspect-[4/3] overflow-hidden bg-base-200">
+                  <canvas
+                    id={"room-preview-#{room.slug}"}
+                    phx-hook="RoomPreview"
+                    phx-update="ignore"
+                    data-strokes={room.preview_strokes_json}
+                    data-default-color={Ink.Canvas.default_color()}
+                    class="h-full w-full"
                   >
-                    <div>
-                      <p class="text-sm font-medium text-base-content">
-                        {room.name}
-                      </p>
-                      <p class="mt-0.5 text-xs font-mono text-base-content/60">
-                        {room.slug}
-                      </p>
-                    </div>
-                  </.link>
+                  </canvas>
 
-                  <div class="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      phx-click="open_share_modal"
-                      phx-value-slug={room.slug}
-                      class="inline-flex items-center justify-center rounded-full p-1 text-xs text-base-content/70 transition hover:bg-base-200 hover:text-base-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
-                      title="Compartir room"
-                    >
-                      <.icon name="hero-share" class="h-4 w-4" />
-                    </button>
+                  <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-base-100/70 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  </div>
 
-                    <button
-                      type="button"
-                      phx-click="open_delete_modal"
-                      phx-value-slug={room.slug}
-                      class="inline-flex items-center justify-center rounded-full p-1 text-xs text-red-500/80 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/70"
-                      title="Eliminar room"
+                  <div class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-base-100/95 px-2 py-0.5 text-[11px] font-medium text-base-content/70 shadow-sm ring-1 ring-base-300/80">
+                    <span
+                      class={[
+                        "h-1.5 w-1.5 rounded-full",
+                        if(room.online_count > 0, do: "bg-emerald-400", else: "bg-base-300")
+                      ]}
                     >
-                      <.icon name="hero-trash" class="h-4 w-4" />
-                    </button>
+                    </span>
+                    <span>{online_label(room.online_count)}</span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
 
-          <section class="rounded-2xl bg-base-100 p-4 shadow-sm ring-1 ring-base-300/70">
-            <div class="flex items-center justify-between gap-2">
-              <h2 class="text-sm font-semibold text-base-content">Compartidos contigo</h2>
-              <span class="rounded-full bg-base-200 px-2 py-0.5 text-xs font-medium text-base-content/70">
-                {length(@shared_rooms)} {if length(@shared_rooms) == 1, do: "room", else: "rooms"}
-              </span>
-            </div>
+                <div class="px-3 py-2.5">
+                  <p class="truncate text-sm font-semibold text-base-content">
+                    {room.name}
+                  </p>
+                  <p class="mt-0.5 truncate text-xs font-mono text-base-content/60">
+                    {room.slug}
+                  </p>
+                </div>
+              </.link>
 
-            <div class="mt-3 space-y-2">
-              <div :if={@shared_rooms == []} class="rounded-xl border border-dashed border-base-300/80 bg-base-100/60 px-3 py-4 text-center text-xs text-base-content/70">
-                Todavía no te compartieron ningún room. Cuando alguien te invite, aparecerá aquí.
-              </div>
-
-              <div
-                :for={room <- @shared_rooms}
-                class="group relative overflow-hidden rounded-xl border border-base-300/70 bg-base-100/80 px-3 py-2 transition hover:border-primary/60 hover:bg-primary/5"
-              >
-                <.link
-                  navigate={~p"/room/#{room.slug}"}
-                  class="flex items-center justify-between gap-3"
-                >
-                  <div>
-                    <p class="text-sm font-medium text-base-content">
-                      {room.name}
-                    </p>
-                    <p class="mt-0.5 text-xs text-base-content/60">
-                      Propietario:
+              <div class="flex items-center justify-between gap-3 px-3 pb-2.5">
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-base-200 px-2 py-0.5 text-[11px] font-medium text-base-content/70">
+                  <.icon
+                    :if={room.kind == :owned}
+                    name="hero-user"
+                    class="h-3.5 w-3.5"
+                  />
+                  <.icon
+                    :if={room.kind == :shared}
+                    name="hero-user-group"
+                    class="h-3.5 w-3.5"
+                  />
+                  <span>
+                    <%= if room.kind == :owned do %>
+                      Tu room
+                    <% else %>
+                      Compartido ·
                       <span class="font-mono">
                         {room.owner && room.owner.email}
                       </span>
-                    </p>
-                  </div>
+                    <% end %>
+                  </span>
+                </div>
 
-                  <.icon
-                    name="hero-arrow-right"
-                    class="h-4 w-4 text-base-content/40 transition group-hover:translate-x-0.5 group-hover:text-primary"
-                  />
-                </.link>
+                <div
+                  :if={room.kind == :owned}
+                  class="flex items-center gap-1.5"
+                >
+                  <button
+                    type="button"
+                    phx-click="open_share_modal"
+                    phx-value-slug={room.slug}
+                    class="inline-flex items-center justify-center rounded-full p-1 text-xs text-base-content/70 transition hover:bg-base-200 hover:text-base-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+                    title="Compartir room"
+                  >
+                    <.icon name="hero-share" class="h-4 w-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    phx-click="open_delete_modal"
+                    phx-value-slug={room.slug}
+                    class="inline-flex items-center justify-center rounded-full p-1 text-xs text-red-500/80 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/70"
+                    title="Eliminar room"
+                  >
+                    <.icon name="hero-trash" class="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
 
         <div
           :if={@share_modal_open? && @room_to_share}
@@ -304,13 +319,43 @@ defmodule InkWeb.RoomsLive do
   end
 
   defp load_rooms(socket, %{} = current_user) do
-    owned_rooms = Collaboration.list_owned_rooms(current_user)
-    shared_rooms = Collaboration.list_shared_rooms(current_user)
+    owned_rooms =
+      current_user
+      |> Collaboration.list_owned_rooms()
+      |> Enum.map(&enhance_room/1)
+      |> Enum.map(&Map.put(&1, :kind, :owned))
+
+    shared_rooms =
+      current_user
+      |> Collaboration.list_shared_rooms()
+      |> Enum.map(&enhance_room/1)
+      |> Enum.map(&Map.put(&1, :kind, :shared))
+
+    rooms = owned_rooms ++ shared_rooms
 
     socket
     |> assign(:owned_rooms, owned_rooms)
     |> assign(:shared_rooms, shared_rooms)
+    |> assign(:rooms, rooms)
   end
+
+  defp enhance_room(room) do
+    strokes = CanvasStore.get_strokes(room.slug)
+    preview_strokes_json = Phoenix.json_library().encode!(strokes)
+
+    online_count =
+      "canvas:room:#{room.slug}"
+      |> Presence.list()
+      |> map_size()
+
+    room
+    |> Map.put(:preview_strokes_json, preview_strokes_json)
+    |> Map.put(:online_count, online_count)
+  end
+
+  defp online_label(0), do: "Sin personas conectadas"
+  defp online_label(1), do: "1 persona conectada"
+  defp online_label(n), do: "#{n} personas conectadas"
 
   defp random_slug do
     8

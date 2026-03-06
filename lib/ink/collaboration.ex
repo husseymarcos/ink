@@ -101,25 +101,6 @@ defmodule Ink.Collaboration do
     end
   end
 
-  def list_owned_rooms(%User{id: user_id}) do
-    from(r in Room,
-      where: r.owner_id == ^user_id,
-      order_by: [desc: r.inserted_at]
-    )
-    |> Repo.all()
-  end
-
-  def list_shared_rooms(%User{id: user_id}) do
-    from(r in Room,
-      join: m in RoomMembership,
-      on: m.room_id == r.id,
-      where: m.user_id == ^user_id and r.owner_id != ^user_id,
-      preload: [:owner],
-      order_by: [desc: r.inserted_at]
-    )
-    |> Repo.all()
-  end
-
   def update_room_name(%Room{} = room, %User{} = actor, name) when is_binary(name) do
     if room.owner_id != actor.id do
       {:error, :not_owner}

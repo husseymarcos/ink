@@ -2,6 +2,7 @@ defmodule InkWeb.CanvasChannel do
   use Phoenix.Channel
 
   alias Ink.Collaboration
+   alias InkWeb.Presence
 
   @impl true
   def join("canvas:room:" <> room_slug, _params, %{assigns: %{current_user: user}} = socket) do
@@ -12,6 +13,13 @@ defmodule InkWeb.CanvasChannel do
       room ->
         if Collaboration.user_has_access?(room, user) do
           socket = assign(socket, :room_id, room_slug)
+
+          {:ok, _} =
+            Presence.track(socket, user.id, %{
+              email: user.email,
+              joined_at: System.system_time(:millisecond)
+            })
+
           strokes = Ink.CanvasStore.get_strokes(room_slug)
           {:ok, %{"strokes" => strokes}, socket}
         else
