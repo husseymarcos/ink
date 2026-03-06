@@ -1,24 +1,27 @@
 <Layouts.app flash={@flash} current_user={@current_user}>
-  <div class="mx-auto w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
-    <h1 class="text-2xl font-semibold text-base-content">Iniciar sesión</h1>
-    <p class="mt-2 text-sm text-base-content/70">
-      Accede para ver tus rooms y rooms compartidos.
-    </p>
+  <div class="flex min-h-[70vh] flex-col items-center justify-center gap-6">
+    <div class="text-center">
+      <img src={~p"/images/logo.png"} alt="Ink" class="mx-auto h-20 w-auto object-contain sm:h-24" />
+      <p class="mt-3 text-5xl font-black tracking-tight text-primary sm:text-6xl">Ink</p>
+      <p class="mt-2 text-sm text-base-content/70">Inicia sesion para continuar</p>
+    </div>
 
-    <.form for={@form} id="login-form" action={~p"/login"} method="post" class="mt-6 space-y-4">
-      <.input field={@form[:email]} type="email" label="Email" required />
-      <.input field={@form[:password]} type="password" label="Password" required />
+    <div class="mx-auto w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+      <.form for={@form} id="login-form" action={~p"/login"} method="post" class="space-y-4">
+        <.input field={@form[:email]} type="email" label="Email" required />
+        <.input field={@form[:password]} type="password" label="Password" required />
 
-      <button type="submit" class="btn btn-primary w-full">
-        Entrar
-      </button>
-    </.form>
+        <button type="submit" class="btn btn-primary w-full">
+          Entrar
+        </button>
+      </.form>
 
-    <p class="mt-4 text-center text-sm text-base-content/70">
-      ¿No tienes cuenta?
-      <.link href={~p"/register"} class="font-medium text-primary hover:text-primary/80">
-        Crear cuenta
-      </.link>
-    </p>
+      <p class="mt-4 text-center text-sm text-base-content/70">
+        ¿No tienes cuenta?
+        <.link href={~p"/register"} class="font-medium text-primary hover:text-primary/80">
+          Crear cuenta
+        </.link>
+      </p>
+    </div>
   </div>
 </Layouts.app>
