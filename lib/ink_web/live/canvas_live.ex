@@ -22,6 +22,8 @@ defmodule InkWeb.CanvasLive do
     socket = assign(socket, :page_title, "Canvas")
     socket = assign(socket, :current_color, Ink.Canvas.default_color())
     socket = assign(socket, :palette, @palette)
+    socket = assign(socket, :room, nil)
+    socket = assign(socket, :room_id, nil)
     socket = assign(socket, :shared_users, [])
     socket = assign(socket, :share_form, to_form(%{"email" => ""}, as: :share))
     socket = assign(socket, :share_modal_open?, false)
@@ -54,11 +56,11 @@ defmodule InkWeb.CanvasLive do
         <div class="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between p-3">
           <div class="pointer-events-auto">
             <.link
-              href={~p"/logout"}
-              method="delete"
-              class="inline-flex items-center gap-2 rounded-lg bg-base-100/90 px-3 py-2 text-sm font-medium text-base-content shadow-sm backdrop-blur-sm transition hover:bg-base-200 focus:ring-2 focus:ring-primary"
+              navigate={~p"/"}
+              class="inline-flex items-center justify-center rounded-full p-1.5 text-sm text-base-content transition hover:bg-base-200 focus:ring-2 focus:ring-primary"
+              aria-label="Volver al dashboard"
             >
-              <.icon name="hero-arrow-left-on-rectangle" class="h-4 w-4" /> Salir
+              <.icon name="hero-arrow-left-on-rectangle" class="h-4 w-4" />
             </.link>
           </div>
 
@@ -66,34 +68,18 @@ defmodule InkWeb.CanvasLive do
             <button
               type="button"
               phx-click="open_room_name"
-              class="group flex flex-col items-end rounded-xl bg-base-100/90 px-3 py-2 text-right shadow-sm backdrop-blur-sm transition hover:bg-base-200 focus:ring-2 focus:ring-primary"
+              class="group inline-flex items-center justify-end gap-1 rounded-md px-1.5 py-0.5 text-sm font-medium text-base-content/80 transition hover:text-base-content hover:bg-base-200/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
               title="Toca para renombrar"
             >
-              <span class="flex items-center gap-2 text-sm font-semibold text-base-content">
-                <span class="font-mono">{@room.name}</span>
-              </span>
-              <span class="text-xs font-medium text-base-content/60">
-                Código: <span class="font-mono">{@room_id}</span>
-              </span>
+              <div class="flex flex-col items-end justify-center leading-tight">
+                <span class="text-sm font-semibold text-base-content">
+                  <span class="font-mono">
+                    {if @room, do: @room.name, else: @room_id}
+                  </span>
+                </span>
+              </div>
             </button>
 
-            <button
-              type="button"
-              phx-click="open_share_modal"
-              class="inline-flex items-center gap-2 rounded-lg bg-base-100/90 px-3 py-2 text-sm font-medium text-base-content shadow-sm backdrop-blur-sm transition hover:bg-base-200 focus:ring-2 focus:ring-primary"
-              title="Compartir"
-            >
-              <.icon name="hero-share" class="h-4 w-4" /> Compartir
-            </button>
-
-            <button
-              type="button"
-              data-canvas-undo
-              class="inline-flex items-center gap-2 rounded-lg bg-base-100/90 px-3 py-2 text-sm font-medium text-base-content shadow-sm backdrop-blur-sm transition hover:bg-base-200 focus:ring-2 focus:ring-primary disabled:pointer-events-none disabled:opacity-50"
-              title="Deshacer (⌘Z)"
-            >
-              <.icon name="hero-arrow-uturn-left" class="h-4 w-4" /> Deshacer
-            </button>
 
             <div
               :if={@room_name_modal_open?}
@@ -146,9 +132,20 @@ defmodule InkWeb.CanvasLive do
                 </div>
               </.form>
 
-              <p class="mt-2 text-xs text-base-content/60">
-                Solo el owner puede cambiar el nombre del room.
-              </p>
+              <div class="mt-3 flex items-center justify-between gap-2">
+                <p class="text-xs text-base-content/60">
+                  Solo el owner puede cambiar el nombre del room.
+                </p>
+
+                <button
+                  type="button"
+                  phx-click="open_share_modal"
+                  class="inline-flex items-center justify-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-base-content/80 transition hover:text-base-content hover:bg-base-200/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+                >
+                  <.icon name="hero-share" class="h-3 w-3" />
+                  <span>Compartir</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -257,6 +254,8 @@ defmodule InkWeb.CanvasLive do
             phx-hook="CanvasDraw"
             phx-update="ignore"
             data-room-id={@room_id}
+            data-user-id={@current_user.id}
+            data-user-email={@current_user.email}
             data-default-color={Ink.Canvas.default_color()}
             class="h-full w-full cursor-crosshair touch-none"
           >

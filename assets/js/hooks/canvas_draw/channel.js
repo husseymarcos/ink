@@ -14,4 +14,5 @@ export function setupChannelHandlers(channel, hook) {
 
   channel.on("draw_point", (payload) => hook._onDrawPoint(payload))
   channel.on("strokes_replaced", (payload) => hook._onStrokesReplaced(payload))
+  channel.on("cursor_position", (payload) => hook._onCursorPosition(payload))
 }

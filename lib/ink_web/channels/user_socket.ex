@@ -16,5 +16,6 @@ defmodule InkWeb.UserSocket do
   def connect(_params, _socket, _connect_info), do: :error
 
   @impl true
-  def id(socket), do: "users_socket:#{socket.assigns.current_user.id}"
+  def id(%{assigns: %{current_user: %{id: id}}}), do: "users_socket:#{id}"
+  def id(_socket), do: nil
 end

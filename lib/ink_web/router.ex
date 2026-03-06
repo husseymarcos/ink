@@ -26,7 +26,7 @@ defmodule InkWeb.Router do
 
     live_session :authenticated,
       on_mount: [{InkWeb.UserAuth, :require_authenticated_user}] do
-      live "/", CanvasLive, :index
+      live "/", RoomsLive, :index
       live "/room/:room_id", CanvasLive, :room
     end
   end

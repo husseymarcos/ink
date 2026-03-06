@@ -4,9 +4,7 @@ defmodule InkWeb.CanvasChannel do
   alias Ink.Collaboration
 
   @impl true
-  def join("canvas:room:" <> room_slug, _params, socket) do
-    user = socket.assigns.current_user
-
+  def join("canvas:room:" <> room_slug, _params, %{assigns: %{current_user: user}} = socket) do
     case Collaboration.get_room_by_slug(room_slug) do
       nil ->
         {:error, %{reason: "room_not_found"}}
@@ -20,6 +18,10 @@ defmodule InkWeb.CanvasChannel do
           {:error, %{reason: "forbidden"}}
         end
     end
+  end
+
+  def join("canvas:room:" <> _room_slug, _params, _socket) do
+    {:error, %{reason: "unauthenticated"}}
   end
 
   @impl true
@@ -49,6 +51,28 @@ defmodule InkWeb.CanvasChannel do
   end
 
   def handle_in("draw", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_in(
+        "cursor_move",
+        %{"x" => x, "y" => y},
+        %{assigns: %{current_user: user}} = socket
+      )
+      when not is_nil(x) and not is_nil(y) do
+
+    broadcast_from!(socket, "cursor_position", %{
+      "x" => x,
+      "y" => y,
+      "user_id" => user.id,
+      "email" => user.email
+    })
+
+    {:noreply, socket}
+  end
+
+  def handle_in("cursor_move", _params, socket) do
     {:noreply, socket}
   end
 
