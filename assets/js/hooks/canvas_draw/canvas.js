@@ -1,4 +1,5 @@
 const POINT_RADIUS = 4
+const LINE_WIDTH = POINT_RADIUS * 2
 
 export function drawPoint(ctx, x, y, color) {
   if (!ctx) return
@@ -10,14 +11,33 @@ export function drawPoint(ctx, x, y, color) {
   ctx.fill()
 }
 
-export function redrawAll(ctx, canvas, strokes, drawPointFn, defaultColor) {
+export function drawLine(ctx, x0, y0, x1, y1, color) {
+  if (!ctx) return
+  ctx.beginPath()
+  ctx.moveTo(Number(x0), Number(y0))
+  ctx.lineTo(Number(x1), Number(y1))
+  ctx.strokeStyle = color
+  ctx.lineWidth = LINE_WIDTH
+  ctx.lineCap = "round"
+  ctx.lineJoin = "round"
+  ctx.stroke()
+}
+
+export function redrawAll(ctx, canvas, strokes, drawPointFn, drawLineFn, defaultColor) {
   if (!ctx || !canvas) return
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   for (const stroke of strokes) {
     const points = stroke.points || stroke
     const color = stroke.color || defaultColor
-    for (const p of points) {
-      drawPointFn(p.x, p.y, color)
+    if (points.length === 0) continue
+    if (points.length === 1) {
+      drawPointFn(points[0].x, points[0].y, color)
+    } else {
+      for (let i = 0; i < points.length - 1; i++) {
+        const a = points[i]
+        const b = points[i + 1]
+        drawLineFn(a.x, a.y, b.x, b.y, color)
+      }
     }
   }
 }

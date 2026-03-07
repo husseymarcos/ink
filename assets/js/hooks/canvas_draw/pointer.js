@@ -81,6 +81,7 @@ function handleMove(x, y, hook) {
 
 function onUp(hook) {
   hook.drawing = false
+  hook.lastDrawPoint = null
 }
 
 function maybeSendCursor(x, y, hook) {

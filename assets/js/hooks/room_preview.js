@@ -1,5 +1,6 @@
 const PADDING = 8
 const POINT_RADIUS_PREVIEW = 2
+const LINE_WIDTH_PREVIEW = POINT_RADIUS_PREVIEW * 2
 
 function parseStrokes(raw) {
   if (!raw) return []
@@ -49,6 +50,18 @@ function drawPointScaled(ctx, x, y, color) {
   ctx.arc(px, py, POINT_RADIUS_PREVIEW, 0, 2 * Math.PI)
   ctx.fillStyle = color
   ctx.fill()
+}
+
+function drawLineScaled(ctx, x0, y0, x1, y1, color) {
+  if (!ctx) return
+  ctx.beginPath()
+  ctx.moveTo(Number(x0), Number(y0))
+  ctx.lineTo(Number(x1), Number(y1))
+  ctx.strokeStyle = color
+  ctx.lineWidth = LINE_WIDTH_PREVIEW
+  ctx.lineCap = "round"
+  ctx.lineJoin = "round"
+  ctx.stroke()
 }
 
 export const RoomPreview = {
@@ -122,11 +135,25 @@ export const RoomPreview = {
       const pts = stroke.points || stroke
       const color = stroke.color || this.defaultColor
       if (!Array.isArray(pts)) continue
-      for (const p of pts) {
+      if (pts.length === 0) continue
+      if (pts.length === 1) {
+        const p = pts[0]
         const x = Number(p.x ?? p["x"])
         const y = Number(p.y ?? p["y"])
         if (Number.isFinite(x) && Number.isFinite(y)) {
           drawPointScaled(ctx, x, y, color)
+        }
+      } else {
+        for (let i = 0; i < pts.length - 1; i++) {
+          const a = pts[i]
+          const b = pts[i + 1]
+          const x0 = Number(a.x ?? a["x"])
+          const y0 = Number(a.y ?? a["y"])
+          const x1 = Number(b.x ?? b["x"])
+          const y1 = Number(b.y ?? b["y"])
+          if (Number.isFinite(x0) && Number.isFinite(y0) && Number.isFinite(x1) && Number.isFinite(y1)) {
+            drawLineScaled(ctx, x0, y0, x1, y1, color)
+          }
         }
       }
     }

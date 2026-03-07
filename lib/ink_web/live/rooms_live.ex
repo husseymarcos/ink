@@ -42,7 +42,7 @@ defmodule InkWeb.RoomsLive do
               <img
                 src={~p"/images/logo.png"}
                 alt="Ink"
-                class="h-8 w-auto object-contain sm:h-9"
+                class="h-16 w-auto object-contain sm:h-20"
               />
             </div>
             <h1 class="text-lg font-semibold tracking-tight text-base-content sm:text-xl">

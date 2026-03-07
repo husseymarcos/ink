@@ -34,6 +34,7 @@ export const CanvasDraw = {
     this.canvas = this.el
     this.ctx = this.canvas.getContext("2d")
     this.drawing = false
+    this.lastDrawPoint = null
     this.strokes = []
     this.currentColor = this.el.dataset.defaultColor
     this.currentUserId = this.el.dataset.userId || null
@@ -59,12 +60,17 @@ export const CanvasDraw = {
     canvas.drawPoint(this.ctx, x, y, color ?? this.currentColor)
   },
 
+  drawLine(x0, y0, x1, y1, color) {
+    canvas.drawLine(this.ctx, x0, y0, x1, y1, color ?? this.currentColor)
+  },
+
   redrawAll() {
     canvas.redrawAll(
       this.ctx,
       this.canvas,
       this.strokes,
       (x, y, color) => this.drawPoint(x, y, color),
+      (x0, y0, x1, y1, color) => this.drawLine(x0, y0, x1, y1, color),
       this.currentColor
     )
   },
@@ -91,12 +97,18 @@ export const CanvasDraw = {
     const strokeColor = color || this.currentColor
     if (stroke_start) {
       this.strokes.push({ points: [point], color: strokeColor })
+      this.drawPoint(x, y, strokeColor)
     } else {
       if (this.strokes.length === 0) this.strokes.push({ points: [], color: strokeColor })
       const last = this.strokes[this.strokes.length - 1]
+      const prev = last.points[last.points.length - 1]
       last.points.push(point)
+      if (prev) {
+        this.drawLine(prev.x, prev.y, x, y, strokeColor)
+      } else {
+        this.drawPoint(x, y, strokeColor)
+      }
     }
-    this.drawPoint(x, y, strokeColor)
     this._updateUndoButton()
   },
 
@@ -186,8 +198,16 @@ export const CanvasDraw = {
   },
 
   _sendPoint(x, y, strokeStart) {
-    if (strokeStart) this.channel.push("start_stroke", { color: this.currentColor })
-    this.drawPoint(x, y)
+    if (strokeStart) {
+      this.channel.push("start_stroke", { color: this.currentColor })
+      this.lastDrawPoint = { x, y }
+      this.drawPoint(x, y)
+    } else {
+      if (this.lastDrawPoint) {
+        this.drawLine(this.lastDrawPoint.x, this.lastDrawPoint.y, x, y)
+      }
+      this.lastDrawPoint = { x, y }
+    }
     this.channel.push("draw", { x, y })
   },
 
