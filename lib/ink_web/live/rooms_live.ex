@@ -38,6 +38,13 @@ defmodule InkWeb.RoomsLive do
       <div class="mx-auto flex h-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
         <header class="flex items-center justify-between gap-4">
           <div>
+            <div class="mb-3 flex items-center gap-3">
+              <img
+                src={~p"/images/logo.png"}
+                alt="Ink"
+                class="h-8 w-auto object-contain sm:h-9"
+              />
+            </div>
             <h1 class="text-lg font-semibold tracking-tight text-base-content sm:text-xl">
               Tus rooms
             </h1>
@@ -117,12 +124,10 @@ defmodule InkWeb.RoomsLive do
                   </div>
 
                   <div class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-base-100/95 px-2 py-0.5 text-[11px] font-medium text-base-content/70 shadow-sm ring-1 ring-base-300/80">
-                    <span
-                      class={[
-                        "h-1.5 w-1.5 rounded-full",
-                        if(room.online_count > 0, do: "bg-emerald-400", else: "bg-base-300")
-                      ]}
-                    >
+                    <span class={[
+                      "h-1.5 w-1.5 rounded-full",
+                      if(room.online_count > 0, do: "bg-emerald-400", else: "bg-base-300")
+                    ]}>
                     </span>
                     <span>{online_label(room.online_count)}</span>
                   </div>
@@ -211,8 +216,8 @@ defmodule InkWeb.RoomsLive do
                 <div>
                   <p class="text-sm font-semibold text-base-content">Compartir room</p>
                   <p class="text-xs text-base-content/60">
-                    Room: <span class="font-mono">{@room_to_share.name}</span> · Código:
-                    <span class="font-mono">{@room_to_share.slug}</span>
+                    Room: <span class="font-mono">{@room_to_share.name}</span>
+                    · Código: <span class="font-mono">{@room_to_share.slug}</span>
                   </p>
                 </div>
                 <button
@@ -474,5 +479,3 @@ defmodule InkWeb.RoomsLive do
     end
   end
 end
-
-

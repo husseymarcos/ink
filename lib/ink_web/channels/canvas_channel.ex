@@ -2,7 +2,7 @@ defmodule InkWeb.CanvasChannel do
   use Phoenix.Channel
 
   alias Ink.Collaboration
-   alias InkWeb.Presence
+  alias InkWeb.Presence
 
   @impl true
   def join("canvas:room:" <> room_slug, _params, %{assigns: %{current_user: user}} = socket) do
@@ -69,7 +69,6 @@ defmodule InkWeb.CanvasChannel do
         %{assigns: %{current_user: user}} = socket
       )
       when not is_nil(x) and not is_nil(y) do
-
     broadcast_from!(socket, "cursor_position", %{
       "x" => x,
       "y" => y,
@@ -84,7 +83,6 @@ defmodule InkWeb.CanvasChannel do
     {:noreply, socket}
   end
 
-  @impl true
   def handle_in("undo", _params, socket) do
     room_id = socket.assigns.room_id
 

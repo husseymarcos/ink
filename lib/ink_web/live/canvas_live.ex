@@ -80,7 +80,6 @@ defmodule InkWeb.CanvasLive do
               </div>
             </button>
 
-
             <div
               :if={@room_name_modal_open?}
               class="absolute right-0 top-12 w-[22rem] rounded-2xl bg-base-100 p-4 shadow-xl ring-1 ring-base-300"

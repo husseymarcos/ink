@@ -10,4 +10,3 @@ defmodule InkWeb.Presence do
     otp_app: :ink,
     pubsub_server: Ink.PubSub
 end
-

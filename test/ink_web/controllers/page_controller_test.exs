@@ -8,7 +8,7 @@ defmodule InkWeb.PageControllerTest do
     assert redirected_to(conn) == ~p"/login"
   end
 
-  test "GET / redirects authenticated users to a room", %{conn: conn} do
+  test "GET / shows dashboard for authenticated users", %{conn: conn} do
     {:ok, user} =
       Accounts.register_user(%{
         "email" => "canvas@example.com",
@@ -21,6 +21,7 @@ defmodule InkWeb.PageControllerTest do
       |> put_session(:user_id, user.id)
       |> get(~p"/")
 
-    assert redirected_to(conn) =~ "/room/"
+    assert conn.status == 200
+    assert conn.resp_body =~ "Tus rooms"
   end
 end

@@ -45,3 +45,13 @@ export function getCoords(canvas, e) {
     y: Math.round((e.clientY - rect.top) * scaleY)
   }
 }
+
+export function getCoordsFromTouch(canvas, touch) {
+  const rect = canvas.getBoundingClientRect()
+  const scaleX = canvas.width / rect.width
+  const scaleY = canvas.height / rect.height
+  return {
+    x: Math.round((touch.clientX - rect.left) * scaleX),
+    y: Math.round((touch.clientY - rect.top) * scaleY)
+  }
+}
