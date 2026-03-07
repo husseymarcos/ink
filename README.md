@@ -1,107 +1,61 @@
 # Ink
 
-**Collaborative whiteboard. Events over pixels.**
+![Ink logo](priv/static/images/logo.png)
+
+**Real-time collaborative whiteboard.** Draw, share, and work together on the same canvas.
 
 ---
 
-## Core Philosophy
+## What is Ink?
 
-Ink runs on the **BEAM** because real-time collaboration demands more than fast APIs—it needs a runtime built for **concurrency**, **fault tolerance**, and **soft real-time** guarantees. We treat drawings as an **event-sourced** stream of immutable strokes: every action is an event, every canvas a replay. That gives us **sub-100ms latency** on the hot path and **time-travel** for free.
+Ink is a digital whiteboard built for teams. Create rooms, invite whoever you need, and everyone can draw at the same time on the same canvas. Strokes appear instantly on all devices—no refresh or manual sync.
 
 ---
 
-## Key Features
+## Features
 
 | Feature | Description |
-|--------|-------------|
-| **Live Collaboration** | Strokes sync across clients via **Phoenix PubSub**. No polling; pure push. |
-| **Time-Travel Engine** | Reconstruct canvas state at any point in time by replaying the event log. |
-| **Presence & Cursors** | See who’s on the board and where they’re pointing with **Phoenix.Presence**. |
-| **Hybrid State** | **ETS** for the hot path (live drawing), **PostgreSQL JSONB** for the cold path (persistence). |
+|---------|-------------|
+| **Real-time drawing** | Draw with mouse or touch. Strokes render smoothly and continuously, even when you draw quickly. |
+| **Multiple rooms** | Create as many rooms as you need (meetings, projects, brainstorming). Each room has its own canvas. |
+| **Room preview** | The room list shows a thumbnail of each board so you can find the one you need. |
+| **Live collaboration** | See who’s in the room and where each person’s cursor is in real time. |
+| **Multiple colors** | Pick stroke color before drawing to organize ideas or highlight parts of the sketch. |
+| **Undo** | Undo the last stretch of drawing with one click or keyboard shortcut (Ctrl/Cmd + Z). |
+| **User accounts** | Sign up and log in to create rooms and access your boards. |
 
 ---
 
-## Technical Stack
+## Getting started
 
-| Layer | Technology |
-|-------|------------|
-| Language & Runtime | **Elixir** / **OTP** |
-| Web Framework | **Phoenix** |
-| Real-Time UI | **Phoenix LiveView** |
-| In-Memory Store | **ETS** |
-| Messaging | **Phoenix PubSub** |
-| Persistence | **PostgreSQL** (JSONB) |
+1. **Install dependencies and set up the database**
 
----
+   ```bash
+   mix deps.get
+   mix ecto.setup
+   ```
 
-## Architecture Deep Dive
+2. **Start the application**
 
-```
-Client Event  →  Phoenix Hook  →  LiveView  →  GenServer (Room)  →  ETS  →  PubSub  →  Clients
-```
+   ```bash
+   mix phx.server
+   ```
 
-1. **Client event** — Pointer/touch input is captured in the browser.
-2. **Phoenix Hook** — A **phx-hook** sends drawing events to the LiveView with minimal payload.
-3. **LiveView** — Validates and forwards to the **Room** process.
-4. **GenServer (Room)** — One process per board; appends the event to **ETS** and broadcasts via **PubSub**.
-5. **ETS** — Holds the ordered event stream for the current session; reads are cheap and shared.
-6. **PubSub** — Pushes the new event to all subscribed LiveViews (and thus all clients).
+3. **Open your browser** at [http://localhost:4000](http://localhost:4000).
 
-Each room is an **OTP process**; the event log is the single source of truth. Playback is just iterating the log up to a given index.
-
-### Stroke lifecycle (flow)
-
-```mermaid
-flowchart TB
-    subgraph Client["🖱️ Client"]
-        A[User: mouse/touch down] --> B[Pointer move events]
-        B --> C[User: mouse/touch up]
-        C --> D[Phoenix Hook: stroke payload]
-    end
-
-    D --> E[LiveView: push_event / handle_event]
-    E --> F{Valid?}
-    F -->|yes| G[LiveView → GenServer Room]
-    F -->|no| X[Discard]
-
-    G --> H[Room: append stroke to ETS]
-    H --> I[Room: PubSub.broadcast]
-    I --> J[Subscribed LiveViews]
-    J --> K[Clients re-render canvas]
-
-    H --> L[(Cold path: persist)]
-    L --> M[PostgreSQL JSONB]
-```
-
-| Step | Description |
-|------|-------------|
-| **Client** | User draws; **phx-hook** captures pointer events and sends a single stroke payload (e.g. points + tool + color) on pointer up. |
-| **LiveView** | Receives the event, validates it, and forwards to the **Room** GenServer. |
-| **Room** | Appends the stroke to **ETS** (hot path), broadcasts via **PubSub**, and enqueues or triggers **cold path** persistence to **PostgreSQL**. |
-| **Other clients** | Receive the broadcast and replay the new stroke on their canvas. |
+4. Create an account, log in, and create your first room to start drawing.
 
 ---
 
-## Getting Started
+## Requirements
 
-```bash
-# Install dependencies
-mix deps.get
-
-# Create and migrate the database
-mix ecto.setup
-
-# Start the Phoenix server
-mix phx.server
-```
-
-Then open [http://localhost:4000](http://localhost:4000) in your browser.
+- Elixir 1.14 or higher  
+- PostgreSQL  
+- Node.js (for front-end assets in development)
 
 ---
 
 ## Learn more
 
-- [Phoenix](https://www.phoenixframework.org/)
+- [Phoenix Framework](https://www.phoenixframework.org/)
 - [Phoenix LiveView](https://hexdocs.pm/phoenix_live_view)
-- [Phoenix PubSub](https://hexdocs.pm/phoenix_pubsub)
-- [ETS](https://www.erlang.org/doc/man/ets.html)
