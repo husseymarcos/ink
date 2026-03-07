@@ -8,6 +8,9 @@ defmodule Ink.Repo.Migrations.AddRoomsExtensions1 do
   use Ecto.Migration
 
   def up do
+    # Required for gen_random_uuid() on PostgreSQL < 13 (built-in from PG 13+)
+    execute("CREATE EXTENSION IF NOT EXISTS pgcrypto")
+
     # Use ANYELEMENT instead of ANYCOMPATIBLE for PostgreSQL 11 compatibility (ANYCOMPATIBLE exists from PG 12+)
     execute("""
     CREATE OR REPLACE FUNCTION ash_elixir_or(left BOOLEAN, in right ANYELEMENT, out f1 ANYELEMENT)
