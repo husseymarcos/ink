@@ -8,8 +8,9 @@ defmodule Ink.Repo.Migrations.AddRoomsExtensions1 do
   use Ecto.Migration
 
   def up do
+    # Use ANYELEMENT instead of ANYCOMPATIBLE for PostgreSQL 11 compatibility (ANYCOMPATIBLE exists from PG 12+)
     execute("""
-    CREATE OR REPLACE FUNCTION ash_elixir_or(left BOOLEAN, in right ANYCOMPATIBLE, out f1 ANYCOMPATIBLE)
+    CREATE OR REPLACE FUNCTION ash_elixir_or(left BOOLEAN, in right ANYELEMENT, out f1 ANYELEMENT)
     AS $$ SELECT COALESCE(NULLIF($1, FALSE), $2) $$
     LANGUAGE SQL
     SET search_path = ''
@@ -17,7 +18,7 @@ defmodule Ink.Repo.Migrations.AddRoomsExtensions1 do
     """)
 
     execute("""
-    CREATE OR REPLACE FUNCTION ash_elixir_or(left ANYCOMPATIBLE, in right ANYCOMPATIBLE, out f1 ANYCOMPATIBLE)
+    CREATE OR REPLACE FUNCTION ash_elixir_or(left ANYELEMENT, in right ANYELEMENT, out f1 ANYELEMENT)
     AS $$ SELECT COALESCE($1, $2) $$
     LANGUAGE SQL
     SET search_path = ''
@@ -25,7 +26,7 @@ defmodule Ink.Repo.Migrations.AddRoomsExtensions1 do
     """)
 
     execute("""
-    CREATE OR REPLACE FUNCTION ash_elixir_and(left BOOLEAN, in right ANYCOMPATIBLE, out f1 ANYCOMPATIBLE) AS $$
+    CREATE OR REPLACE FUNCTION ash_elixir_and(left BOOLEAN, in right ANYELEMENT, out f1 ANYELEMENT) AS $$
       SELECT CASE
         WHEN $1 IS TRUE THEN $2
         ELSE $1
@@ -36,7 +37,7 @@ defmodule Ink.Repo.Migrations.AddRoomsExtensions1 do
     """)
 
     execute("""
-    CREATE OR REPLACE FUNCTION ash_elixir_and(left ANYCOMPATIBLE, in right ANYCOMPATIBLE, out f1 ANYCOMPATIBLE) AS $$
+    CREATE OR REPLACE FUNCTION ash_elixir_and(left ANYELEMENT, in right ANYELEMENT, out f1 ANYELEMENT) AS $$
       SELECT CASE
         WHEN $1 IS NOT NULL THEN $2
         ELSE $1
@@ -87,8 +88,8 @@ defmodule Ink.Repo.Migrations.AddRoomsExtensions1 do
     """)
 
     execute("""
-    CREATE OR REPLACE FUNCTION ash_raise_error(json_data jsonb, type_signal ANYCOMPATIBLE)
-    RETURNS ANYCOMPATIBLE AS $$
+    CREATE OR REPLACE FUNCTION ash_raise_error(json_data jsonb, type_signal ANYELEMENT)
+    RETURNS ANYELEMENT AS $$
     BEGIN
         -- Raise an error with the provided JSON data.
         -- The JSON object is converted to text for inclusion in the error message.
@@ -133,7 +134,7 @@ defmodule Ink.Repo.Migrations.AddRoomsExtensions1 do
     # Uncomment this if you actually want to uninstall the extensions
     # when this migration is rolled back:
     execute(
-      "DROP FUNCTION IF EXISTS uuid_generate_v7(), timestamp_from_uuid_v7(uuid), ash_raise_error(jsonb), ash_raise_error(jsonb, ANYCOMPATIBLE), ash_elixir_and(BOOLEAN, ANYCOMPATIBLE), ash_elixir_and(ANYCOMPATIBLE, ANYCOMPATIBLE), ash_elixir_or(ANYCOMPATIBLE, ANYCOMPATIBLE), ash_elixir_or(BOOLEAN, ANYCOMPATIBLE), ash_trim_whitespace(text[])"
+      "DROP FUNCTION IF EXISTS uuid_generate_v7(), timestamp_from_uuid_v7(uuid), ash_raise_error(jsonb), ash_raise_error(jsonb, ANYELEMENT), ash_elixir_and(BOOLEAN, ANYELEMENT), ash_elixir_and(ANYELEMENT, ANYELEMENT), ash_elixir_or(ANYELEMENT, ANYELEMENT), ash_elixir_or(BOOLEAN, ANYELEMENT), ash_trim_whitespace(text[])"
     )
   end
 end

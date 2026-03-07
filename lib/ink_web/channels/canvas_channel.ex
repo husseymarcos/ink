@@ -48,7 +48,8 @@ defmodule InkWeb.CanvasChannel do
     Ink.CanvasStore.add_point(room_id, x, y)
     color = Ink.CanvasStore.get_last_stroke_color(room_id)
 
-    broadcast!(socket, "draw_point", %{
+    # broadcast_from! so the sender does not receive their own draw_point (they already drew locally)
+    broadcast_from!(socket, "draw_point", %{
       "x" => x,
       "y" => y,
       "stroke_start" => stroke_start,
