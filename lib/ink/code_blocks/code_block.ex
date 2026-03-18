@@ -18,15 +18,14 @@ defmodule Ink.CodeBlocks.CodeBlock do
     timestamps(type: :utc_datetime_usec)
   end
 
-  @valid_languages ["javascript", "python", "plain_text"]
+  @valid_languages ["javascript", "python"]
 
   def languages, do: @valid_languages
 
   def templates do
     %{
       "javascript" => "console.log(\"Hello, World!\");",
-      "python" => "print(\"Hello, World!\")",
-      "plain_text" => ""
+      "python" => "print(\"Hello, World!\")"
     }
   end
 
@@ -51,7 +50,6 @@ defmodule Ink.CodeBlocks.CodeBlock do
 
   defp normalize_language("js"), do: "javascript"
   defp normalize_language("python"), do: "python"
-  defp normalize_language("plain_text"), do: "plain_text"
   defp normalize_language(lang) when lang in @valid_languages, do: lang
   defp normalize_language(_), do: "javascript"
 end

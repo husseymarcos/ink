@@ -35,7 +35,7 @@ export const CodeBlocksContainer = {
 
 export const CodeBlock = {
   mounted() {
-    this._setupToolbarDrag()
+    this._setupDragToMove()
     this._setupEditor()
     this._setupCopy()
     this._setupDeleteConfirm()
@@ -66,11 +66,92 @@ export const CodeBlock = {
           this._showOutput(payload)
         }
         break
+
+      case "code_block_language_changed":
+        if (payload.id === this.el.dataset.codeBlockId) {
+          const editor = this.el.querySelector("[data-code-editor]")
+          if (editor && payload.code !== undefined) {
+            editor.value = payload.code
+            this._updateHighlighting(editor)
+          }
+          if (payload.language) {
+            this.el.dataset.language = payload.language
+          }
+        }
+        break
     }
   },
 
-  _setupToolbarDrag() {
-    // Drag functionality removed - code blocks are now created by clicking the button
+  _setupDragToMove() {
+    const header = this.el.querySelector("[data-drag-handle]")
+    if (!header) return
+
+    let isDragging = false
+    let startX = 0
+    let startY = 0
+    let initialX = 0
+    let initialY = 0
+
+    const onMouseDown = (e) => {
+      if (e.target.closest("button, select, input, textarea")) return
+      if (e.target.closest("[data-delete-btn]") || e.target.closest("[data-copy-btn]")) return
+
+      isDragging = true
+      startX = e.clientX
+      startY = e.clientY
+      initialX = this.el.offsetLeft
+      initialY = this.el.offsetTop
+
+      document.body.style.cursor = "grabbing"
+      document.body.style.userSelect = "none"
+
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    const onMouseMove = (e) => {
+      if (!isDragging) return
+
+      e.preventDefault()
+      e.stopPropagation()
+
+      const dx = e.clientX - startX
+      const dy = e.clientY - startY
+
+      const newX = Math.max(0, initialX + dx)
+      const newY = Math.max(0, initialY + dy)
+
+      this.el.style.left = `${newX}px`
+      this.el.style.top = `${newY}px`
+    }
+
+    const onMouseUp = (e) => {
+      if (!isDragging) return
+      isDragging = false
+      document.body.style.cursor = ""
+      document.body.style.userSelect = ""
+
+      const newX = this.el.offsetLeft
+      const newY = this.el.offsetTop
+      const codeBlockId = this.el.dataset.codeBlockId
+
+      if (codeBlockId) {
+        this.pushEvent("code_block_move", { id: codeBlockId, x: newX, y: newY })
+      }
+
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    header.addEventListener("mousedown", onMouseDown)
+    document.addEventListener("mousemove", onMouseMove)
+    document.addEventListener("mouseup", onMouseUp)
+
+    this._cleanupDrag = () => {
+      header.removeEventListener("mousedown", onMouseDown)
+      document.removeEventListener("mousemove", onMouseMove)
+      document.removeEventListener("mouseup", onMouseUp)
+    }
   },
 
   _setupEditor() {
@@ -104,7 +185,7 @@ export const CodeBlock = {
         this._debounceTimer = setTimeout(() => {
           this.pushEvent("code_block_save", {
             id: codeBlockId,
-            code: editor.value
+            value: editor.value
           })
         }, 1000)
       })
@@ -115,7 +196,7 @@ export const CodeBlock = {
     const language = this.el.dataset.language
     const code = editor.value
 
-    if (language === "plain_text" || !hljs.getLanguage(language)) {
+    if (!hljs.getLanguage(language)) {
       editor.className = "code-editor w-full h-full p-3 bg-transparent text-sm font-mono text-success resize-none focus:outline-none"
       return
     }
@@ -151,6 +232,7 @@ export const CodeBlock = {
     if (!deleteBtn) return
 
     deleteBtn.addEventListener("click", (e) => {
+      e.preventDefault()
       e.stopPropagation()
       if (confirm("¿Estás seguro de que quieres eliminar este bloque de código?")) {
         const codeBlockId = this.el.dataset.codeBlockId

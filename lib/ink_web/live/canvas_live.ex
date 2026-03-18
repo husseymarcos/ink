@@ -418,7 +418,6 @@ defmodule InkWeb.CanvasLive do
           {:ok, code_block} ->
             code_block_map = Ink.CodeBlocks.to_map(code_block)
             Ink.CanvasStore.put_code_block(room_id, code_block_map)
-            broadcast_to_channel(socket, "code_block_inserted", code_block_map)
 
             {:noreply,
              socket
@@ -430,7 +429,7 @@ defmodule InkWeb.CanvasLive do
     end
   end
 
-  def handle_event("code_block_save", %{"id" => id, "code" => code}, socket) do
+  def handle_event("code_block_save", %{"id" => id, "value" => code}, socket) do
     room_id = socket.assigns.room_id
 
     case Ink.CodeBlocks.get_code_block(id) do
@@ -448,7 +447,6 @@ defmodule InkWeb.CanvasLive do
                 if cb["id"] == id, do: code_block_map, else: cb
               end)
 
-            broadcast_to_channel(socket, "code_block_updated", code_block_map)
             {:noreply, assign(socket, :code_blocks, updated_blocks)}
 
           {:error, _} ->
@@ -502,12 +500,6 @@ defmodule InkWeb.CanvasLive do
             if cb["id"] == id, do: code_block_map, else: cb
           end)
 
-        broadcast_to_channel(socket, "code_block_output", %{
-          "id" => id,
-          "output" => output,
-          "error" => error
-        })
-
         new_error_blocks =
           if error do
             Map.put(socket.assigns.error_blocks, id, true)
@@ -547,8 +539,10 @@ defmodule InkWeb.CanvasLive do
                 if cb["id"] == id, do: code_block_map, else: cb
               end)
 
-            broadcast_to_channel(socket, "code_block_language_changed", code_block_map)
-            {:noreply, assign(socket, :code_blocks, updated_blocks)}
+            {:noreply,
+             socket
+             |> assign(:code_blocks, updated_blocks)
+             |> push_event("code_block_language_changed", code_block_map)}
 
           {:error, _} ->
             {:noreply, socket}
@@ -567,7 +561,6 @@ defmodule InkWeb.CanvasLive do
         case Ink.CodeBlocks.delete_code_block(code_block) do
           {:ok, _} ->
             Ink.CanvasStore.remove_code_block(room_id, id)
-            broadcast_to_channel(socket, "code_block_deleted", %{"id" => id})
 
             updated_blocks = Enum.reject(socket.assigns.code_blocks, fn cb -> cb["id"] == id end)
 
@@ -576,6 +569,32 @@ defmodule InkWeb.CanvasLive do
              |> assign(:code_blocks, updated_blocks)
              |> assign(:running_blocks, Map.delete(socket.assigns.running_blocks, id))
              |> assign(:error_blocks, Map.delete(socket.assigns.error_blocks, id))}
+
+          {:error, _} ->
+            {:noreply, socket}
+        end
+    end
+  end
+
+  def handle_event("code_block_move", %{"id" => id, "x" => x, "y" => y}, socket) do
+    room_id = socket.assigns.room_id
+
+    case Ink.CodeBlocks.get_code_block(id) do
+      nil ->
+        {:noreply, socket}
+
+      code_block ->
+        case Ink.CodeBlocks.update_position(code_block, x, y) do
+          {:ok, updated} ->
+            code_block_map = Ink.CodeBlocks.to_map(updated)
+            Ink.CanvasStore.update_code_block_in_memory(room_id, code_block_map)
+
+            updated_blocks =
+              Enum.map(socket.assigns.code_blocks, fn cb ->
+                if cb["id"] == id, do: code_block_map, else: cb
+              end)
+
+            {:noreply, assign(socket, :code_blocks, updated_blocks)}
 
           {:error, _} ->
             {:noreply, socket}
@@ -692,16 +711,6 @@ defmodule InkWeb.CanvasLive do
          socket
          |> put_flash(:error, "No se pudo abrir el room.")
          |> redirect(to: "/room/#{random_slug()}")}
-    end
-  end
-
-  defp broadcast_to_channel(socket, event, payload) do
-    if socket.assigns[:room_id] do
-      Phoenix.PubSub.broadcast(
-        Ink.PubSub,
-        "canvas:room:#{socket.assigns.room_id}",
-        %{event: event, payload: payload}
-      )
     end
   end
 end

@@ -11,14 +11,12 @@ defmodule Ink.CodeBlocksTest do
       templates = CodeBlock.templates()
       assert templates["javascript"] == "console.log(\"Hello, World!\");"
       assert templates["python"] == "print(\"Hello, World!\")"
-      assert templates["plain_text"] == ""
     end
 
     test "languages returns valid language options" do
       languages = CodeBlock.languages()
       assert "javascript" in languages
       assert "python" in languages
-      assert "plain_text" in languages
     end
   end
 
