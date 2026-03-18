@@ -2,6 +2,7 @@ defmodule InkWeb.CanvasChannel do
   use Phoenix.Channel
 
   alias Ink.Collaboration
+  alias Ink.CodeBlocks
   alias InkWeb.Presence
 
   @impl true
@@ -13,6 +14,7 @@ defmodule InkWeb.CanvasChannel do
       room ->
         if Collaboration.user_has_access?(room, user) do
           socket = assign(socket, :room_id, room_slug)
+          room_id = room.id
 
           {:ok, _} =
             Presence.track(socket, user.id, %{
@@ -21,7 +23,8 @@ defmodule InkWeb.CanvasChannel do
             })
 
           strokes = Ink.CanvasStore.get_strokes(room_slug)
-          {:ok, %{"strokes" => strokes}, socket}
+          code_blocks = load_code_blocks(room_id)
+          {:ok, %{"strokes" => strokes, "code_blocks" => code_blocks}, socket}
         else
           {:error, %{reason: "forbidden"}}
         end
@@ -48,7 +51,6 @@ defmodule InkWeb.CanvasChannel do
     Ink.CanvasStore.add_point(room_id, x, y)
     color = Ink.CanvasStore.get_last_stroke_color(room_id)
 
-    # broadcast_from! so the sender does not receive their own draw_point (they already drew locally)
     broadcast_from!(socket, "draw_point", %{
       "x" => x,
       "y" => y,
@@ -95,6 +97,151 @@ defmodule InkWeb.CanvasChannel do
       {:error, :empty} ->
         {:reply, {:ok, %{}}, socket}
     end
+  end
+
+  @impl true
+  def handle_in("code_block_insert", params, socket) do
+    room_id = socket.assigns.room_id
+    room = Collaboration.get_room_by_slug(room_id)
+
+    case CodeBlocks.create_code_block(Map.put(params, "room_id", room.id)) do
+      {:ok, code_block} ->
+        code_block_map = CodeBlocks.to_map(code_block)
+        Ink.CanvasStore.put_code_block(room_id, code_block_map)
+        broadcast!(socket, "code_block_inserted", code_block_map)
+        {:reply, {:ok, code_block_map}, socket}
+
+      {:error, _} ->
+        {:reply, {:error, %{reason: "failed_to_create"}}, socket}
+    end
+  end
+
+  @impl true
+  def handle_in("code_block_update", %{"id" => id, "code" => code}, socket) do
+    room_id = socket.assigns.room_id
+
+    case CodeBlocks.get_code_block(id) do
+      nil ->
+        {:reply, {:error, %{reason: "not_found"}}, socket}
+
+      code_block ->
+        case CodeBlocks.update_content(code_block, code) do
+          {:ok, updated} ->
+            code_block_map = CodeBlocks.to_map(updated)
+            Ink.CanvasStore.update_code_block_in_memory(room_id, code_block_map)
+            broadcast!(socket, "code_block_updated", code_block_map)
+            {:reply, {:ok, code_block_map}, socket}
+
+          {:error, _} ->
+            {:reply, {:error, %{reason: "failed_to_update"}}, socket}
+        end
+    end
+  end
+
+  @impl true
+  def handle_in("code_block_move", %{"id" => id, "x" => x, "y" => y}, socket) do
+    room_id = socket.assigns.room_id
+
+    case CodeBlocks.get_code_block(id) do
+      nil ->
+        {:reply, {:error, %{reason: "not_found"}}, socket}
+
+      code_block ->
+        case CodeBlocks.update_position(code_block, x, y) do
+          {:ok, updated} ->
+            code_block_map = CodeBlocks.to_map(updated)
+            Ink.CanvasStore.update_code_block_in_memory(room_id, code_block_map)
+            broadcast!(socket, "code_block_moved", code_block_map)
+            {:reply, {:ok, code_block_map}, socket}
+
+          {:error, _} ->
+            {:reply, {:error, %{reason: "failed_to_move"}}, socket}
+        end
+    end
+  end
+
+  @impl true
+  def handle_in("code_block_resize", %{"id" => id, "width" => width}, socket) do
+    room_id = socket.assigns.room_id
+
+    case CodeBlocks.get_code_block(id) do
+      nil ->
+        {:reply, {:error, %{reason: "not_found"}}, socket}
+
+      code_block ->
+        case CodeBlocks.update_width(code_block, width) do
+          {:ok, updated} ->
+            code_block_map = CodeBlocks.to_map(updated)
+            Ink.CanvasStore.update_code_block_in_memory(room_id, code_block_map)
+            broadcast!(socket, "code_block_resized", code_block_map)
+            {:reply, {:ok, code_block_map}, socket}
+
+          {:error, _} ->
+            {:reply, {:error, %{reason: "failed_to_resize"}}, socket}
+        end
+    end
+  end
+
+  @impl true
+  def handle_in("code_block_delete", %{"id" => id}, socket) do
+    room_id = socket.assigns.room_id
+
+    case CodeBlocks.get_code_block(id) do
+      nil ->
+        {:reply, {:error, %{reason: "not_found"}}, socket}
+
+      code_block ->
+        case CodeBlocks.delete_code_block(code_block) do
+          {:ok, _} ->
+            Ink.CanvasStore.remove_code_block(room_id, id)
+            broadcast!(socket, "code_block_deleted", %{"id" => id})
+            {:reply, {:ok, %{}}, socket}
+
+          {:error, _} ->
+            {:reply, {:error, %{reason: "failed_to_delete"}}, socket}
+        end
+    end
+  end
+
+  @impl true
+  def handle_in("code_block_language", %{"id" => id, "language" => language}, socket) do
+    room_id = socket.assigns.room_id
+
+    case CodeBlocks.get_code_block(id) do
+      nil ->
+        {:reply, {:error, %{reason: "not_found"}}, socket}
+
+      code_block ->
+        case CodeBlocks.update_language(code_block, language) do
+          {:ok, updated} ->
+            code_block_map = CodeBlocks.to_map(updated)
+            Ink.CanvasStore.update_code_block_in_memory(room_id, code_block_map)
+            broadcast!(socket, "code_block_language_changed", code_block_map)
+            {:reply, {:ok, code_block_map}, socket}
+
+          {:error, _} ->
+            {:reply, {:error, %{reason: "failed_to_change_language"}}, socket}
+        end
+    end
+  end
+
+  @impl true
+  def handle_in("code_block_run", params, %{assigns: %{current_user: user}} = socket) do
+    %{"id" => id} = params
+
+    broadcast_from!(socket, "code_block_running", %{
+      "id" => id,
+      "user_id" => user.id,
+      "email" => user.email
+    })
+
+    {:reply, {:ok, %{}}, socket}
+  end
+
+  defp load_code_blocks(room_id) do
+    room_id
+    |> CodeBlocks.get_code_blocks_by_room()
+    |> Enum.map(&CodeBlocks.to_map/1)
   end
 
   defp stroke_start?([]), do: true

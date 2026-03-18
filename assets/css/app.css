@@ -102,4 +102,75 @@
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
+/* Code Block Styles */
+.code-block {
+  min-height: 200px;
+  max-height: 400px;
+}
+
+.code-block textarea.code-editor {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  tab-size: 2;
+}
+
+.code-block .output-panel {
+  min-height: 100px;
+}
+
+.code-block .output-panel pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.code-block[data-language="javascript"] .code-editor,
+.code-block[data-language="python"] .code-editor {
+  background-color: oklch(20% 0 0);
+  color: oklch(92% 0 0);
+}
+
+.code-block[data-language="plain_text"] .code-editor {
+  background-color: oklch(95% 0 0);
+  color: oklch(40% 0.05 0);
+}
+
+.code-block .resize-handle {
+  transition: opacity 0.15s ease;
+}
+
+.code-block:hover .resize-handle {
+  opacity: 1;
+}
+
+.draggable-code-block:active {
+  cursor: grabbing;
+}
+
+[data-strokes-above="true"] #ink-canvas {
+  z-index: 1;
+}
+
+[data-strokes-above="false"] #code-blocks-container {
+  z-index: 1;
+}
+
+/* Highlight.js theme adjustments */
+.hljs-keyword { color: oklch(75% 0.15 340); }
+.hljs-built_in { color: oklch(75% 0.15 260); }
+.hljs-type { color: oklch(75% 0.15 180); }
+.hljs-literal { color: oklch(75% 0.15 30); }
+.hljs-number { color: oklch(70% 0.15 30); }
+.hljs-string { color: oklch(70% 0.15 140); }
+.hljs-comment { color: oklch(50% 0 0); font-style: italic; }
+.hljs-function { color: oklch(80% 0.15 220); }
+.hljs-params { color: oklch(90% 0 0); }
+.hljs-variable { color: oklch(90% 0 0); }
+.hljs-title { color: oklch(80% 0.15 220); }
+.hljs-attr { color: oklch(80% 0.15 60); }
+.hljs-selector-tag { color: oklch(75% 0.15 340); }
+.hljs-selector-class { color: oklch(70% 0.15 180); }
+.hljs-meta { color: oklch(50% 0 0); }
+
 /* This file is for your main application CSS */

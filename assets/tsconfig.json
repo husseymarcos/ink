@@ -23,7 +23,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "*": ["../deps/*"]
+      "*": ["../deps/*", "../node_modules/*"]
     },
     "allowJs": true,
     "noEmit": true

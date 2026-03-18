@@ -17,16 +17,32 @@ defmodule Ink.CanvasStore do
 
   def undo(room_id), do: GenServer.call(__MODULE__, {:undo, room_id})
 
+  def get_code_blocks(room_id), do: GenServer.call(__MODULE__, {:get_code_blocks, room_id})
+
+  def put_code_block(room_id, code_block_map),
+    do: GenServer.cast(__MODULE__, {:put_code_block, room_id, code_block_map})
+
+  def remove_code_block(room_id, code_block_id),
+    do: GenServer.cast(__MODULE__, {:remove_code_block, room_id, code_block_id})
+
+  def update_code_block_in_memory(room_id, code_block_map),
+    do: GenServer.cast(__MODULE__, {:update_code_block_in_memory, room_id, code_block_map})
+
   @impl true
   def init(state), do: {:ok, state}
 
   defp get_room_data(state, room_id) do
-    raw = Map.get(state, room_id, [])
-    if is_list(raw), do: %{strokes: raw, texts: []}, else: raw
+    raw = Map.get(state, room_id, %{})
+
+    %{
+      strokes: Map.get(raw, :strokes, []),
+      texts: Map.get(raw, :texts, []),
+      code_blocks: Map.get(raw, :code_blocks, %{})
+    }
   end
 
-  defp put_room_data(state, room_id, %{strokes: strokes, texts: texts}) do
-    Map.put(state, room_id, %{strokes: strokes, texts: texts})
+  defp put_room_data(state, room_id, %{strokes: _, texts: _, code_blocks: _} = data) do
+    Map.put(state, room_id, data)
   end
 
   @impl true
@@ -58,6 +74,12 @@ defmodule Ink.CanvasStore do
   end
 
   @impl true
+  def handle_call({:get_code_blocks, room_id}, _from, state) do
+    %{code_blocks: code_blocks} = get_room_data(state, room_id)
+    {:reply, code_blocks, state}
+  end
+
+  @impl true
   def handle_cast({:start_stroke, room_id, color}, state) do
     data = get_room_data(state, room_id)
     new_strokes = Ink.Canvas.start_stroke(data.strokes, color || Ink.Canvas.default_color())
@@ -81,6 +103,32 @@ defmodule Ink.CanvasStore do
       end
 
     new_state = put_room_data(state, room_id, %{data | strokes: strokes})
+    {:noreply, new_state}
+  end
+
+  @impl true
+  def handle_cast({:put_code_block, room_id, code_block_map}, state) do
+    data = get_room_data(state, room_id)
+    id = code_block_map["id"]
+    new_code_blocks = Map.put(data.code_blocks, id, code_block_map)
+    new_state = put_room_data(state, room_id, %{data | code_blocks: new_code_blocks})
+    {:noreply, new_state}
+  end
+
+  @impl true
+  def handle_cast({:remove_code_block, room_id, code_block_id}, state) do
+    data = get_room_data(state, room_id)
+    new_code_blocks = Map.delete(data.code_blocks, code_block_id)
+    new_state = put_room_data(state, room_id, %{data | code_blocks: new_code_blocks})
+    {:noreply, new_state}
+  end
+
+  @impl true
+  def handle_cast({:update_code_block_in_memory, room_id, code_block_map}, state) do
+    data = get_room_data(state, room_id)
+    id = code_block_map["id"]
+    new_code_blocks = Map.put(data.code_blocks, id, code_block_map)
+    new_state = put_room_data(state, room_id, %{data | code_blocks: new_code_blocks})
     {:noreply, new_state}
   end
 end
