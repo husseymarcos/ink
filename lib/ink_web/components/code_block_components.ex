@@ -147,48 +147,28 @@ defmodule InkWeb.CodeBlockComponents do
     """
   end
 
-  attr :strokes_above, :boolean, default: true
   attr :pyodide_loading, :boolean, default: false
 
   def code_blocks_toolbar(assigns) do
     ~H"""
-    <div class="pointer-events-auto absolute inset-x-0 bottom-20 z-20 flex justify-center">
-      <div class="flex flex-wrap justify-center gap-1.5 rounded-xl bg-base-100/95 p-2 shadow-lg shadow-black/10 backdrop-blur-sm">
-        <div
-          class="draggable-code-block flex items-center gap-1.5 rounded-lg bg-base-200 px-3 py-1.5 text-sm font-medium text-base-content cursor-grab hover:bg-base-300 transition-colors"
-          data-draggable-code-block
-          draggable="true"
-        >
-          <.icon name="hero-code-bracket" class="h-4 w-4" />
-          <span>Code</span>
-        </div>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex items-center justify-center rounded-lg bg-base-200 p-2 text-base-content/80 cursor-pointer hover:bg-base-300 transition-colors"
+        phx-click="code_block_create"
+        title="Crear bloque de código"
+        aria-label="Crear bloque de código"
+      >
+        <.icon name="hero-code-bracket" class="h-4 w-4" />
+      </button>
 
-        <div class="flex items-center gap-1 border-l border-base-300 pl-1.5 ml-1">
-          <button
-            type="button"
-            class={[
-              "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",
-              if(@strokes_above,
-                do: "bg-primary text-primary-content",
-                else: "bg-base-200 text-base-content hover:bg-base-300"
-              )
-            ]}
-            phx-click="toggle_strokes_layer"
-            title="Alternar orden de capas"
-          >
-            <.icon name="hero-queue-list" class="h-3.5 w-3.5" />
-            <span>Strokes Top</span>
-          </button>
-
-          <div
-            :if={@pyodide_loading}
-            class="flex items-center gap-1 rounded-md bg-base-200 px-2 py-1 text-xs text-base-content/60"
-            title="Cargando Python..."
-          >
-            <span class="loading loading-spinner loading-xs"></span>
-            <span>Python</span>
-          </div>
-        </div>
+      <div
+        :if={@pyodide_loading}
+        class="flex items-center gap-1 rounded-md bg-base-200 px-2 py-1 text-xs text-base-content/60"
+        title="Cargando Python..."
+      >
+        <span class="loading loading-spinner loading-xs"></span>
+        <span>Python</span>
       </div>
     </div>
     """

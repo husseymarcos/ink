@@ -70,40 +70,7 @@ export const CodeBlock = {
   },
 
   _setupToolbarDrag() {
-    const toolbarBtns = document.querySelectorAll("[data-draggable-code-block]")
-    const canvas = document.getElementById("ink-canvas")
-
-    if (!canvas) return
-
-    toolbarBtns.forEach((btn) => {
-      btn.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("application/x-code-block", "new")
-        e.dataTransfer.effectAllowed = "copy"
-        btn.classList.add("opacity-50")
-      })
-
-      btn.addEventListener("dragend", () => {
-        btn.classList.remove("opacity-50")
-      })
-    })
-
-    canvas.addEventListener("dragover", (e) => {
-      if (e.dataTransfer.types.includes("application/x-code-block")) {
-        e.preventDefault()
-        e.dataTransfer.dropEffect = "copy"
-      }
-    })
-
-    canvas.addEventListener("drop", (e) => {
-      if (!e.dataTransfer.types.includes("application/x-code-block")) return
-      e.preventDefault()
-
-      const rect = canvas.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-
-      this.pushEvent("code_block_create", { x, y })
-    })
+    // Drag functionality removed - code blocks are now created by clicking the button
   },
 
   _setupEditor() {
@@ -287,38 +254,6 @@ export const CodeBlock = {
     const div = document.createElement("div")
     div.textContent = text
     return div.innerHTML
-  }
-}
-
-export const CodeBlocksToolbar = {
-  mounted() {
-    this._setupDrag()
-  },
-
-  _setupDrag() {
-    const canvas = document.getElementById("ink-canvas")
-    if (!canvas) return
-
-    canvas.addEventListener("dragover", (e) => {
-      if (e.dataTransfer.types.includes("application/x-code-block")) {
-        e.preventDefault()
-        e.dataTransfer.dropEffect = "copy"
-      }
-    })
-
-    canvas.addEventListener("drop", (e) => {
-      if (!e.dataTransfer.types.includes("application/x-code-block")) return
-      e.preventDefault()
-
-      const rect = canvas.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-
-      const canvasLive = document.querySelector("[data-canvas-container]")
-      if (canvasLive && canvasLive.__liveview) {
-        canvasLive.__liveview.pushEvent("code_block_create", { x, y })
-      }
-    })
   }
 }
 

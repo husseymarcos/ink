@@ -258,6 +258,7 @@ defmodule InkWeb.CanvasLive do
             id="code-blocks-container"
             class="absolute inset-0 pointer-events-none"
             phx-hook="CodeBlocksContainer"
+            data-room-id={@room_id}
           >
             <div
               :for={cb <- @code_blocks}
@@ -273,34 +274,33 @@ defmodule InkWeb.CanvasLive do
           </div>
         </div>
 
-        <.code_blocks_toolbar
-          strokes_above={@strokes_above}
-          pyodide_loading={@pyodide_loading}
-        />
-
         <div class="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex justify-center p-3">
           <div
-            class="flex flex-wrap justify-center gap-1.5 rounded-xl bg-base-100/95 p-2 shadow-lg shadow-black/10 backdrop-blur-sm"
+            class="flex items-center justify-between gap-3 rounded-xl bg-base-100/95 p-2 shadow-lg shadow-black/10 backdrop-blur-sm"
             role="group"
             aria-label="Paleta de colores"
           >
-            <%= for color <- @palette do %>
-              <button
-                type="button"
-                phx-click="select_color"
-                phx-value-color={color}
-                class={[
-                  "h-8 w-8 shrink-0 rounded-lg border-2 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-base-100",
-                  if(@current_color == color,
-                    do: "scale-110 border-base-content shadow-md",
-                    else: "border-transparent hover:scale-105 hover:shadow"
-                  )
-                ]}
-                style={"background-color: #{color}; box-shadow: #{if(color == "#ffffff", do: "inset 0 0 0 1px rgba(0,0,0,0.15)", else: "none")}"}
-                title={color}
-              >
-              </button>
-            <% end %>
+            <div class="flex flex-wrap items-center gap-1.5">
+              <%= for color <- @palette do %>
+                <button
+                  type="button"
+                  phx-click="select_color"
+                  phx-value-color={color}
+                  class={[
+                    "h-8 w-8 shrink-0 rounded-lg border-2 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-base-100",
+                    if(@current_color == color,
+                      do: "scale-110 border-base-content shadow-md",
+                      else: "border-transparent hover:scale-105 hover:shadow"
+                    )
+                  ]}
+                  style={"background-color: #{color}; box-shadow: #{if(color == "#ffffff", do: "inset 0 0 0 1px rgba(0,0,0,0.15)", else: "none")}"}
+                  title={color}
+                >
+                </button>
+              <% end %>
+            </div>
+
+            <.code_blocks_toolbar pyodide_loading={@pyodide_loading} />
           </div>
         </div>
       </div>
@@ -388,7 +388,7 @@ defmodule InkWeb.CanvasLive do
     end
   end
 
-  def handle_event("code_block_create", %{"x" => x, "y" => y}, socket) do
+  def handle_event("code_block_create", _params, socket) do
     room_id = socket.assigns.room_id
 
     case Collaboration.get_room_by_slug(room_id) do
@@ -398,6 +398,12 @@ defmodule InkWeb.CanvasLive do
       room ->
         templates = CodeBlock.templates()
         template = Map.get(templates, "javascript", "")
+
+        canvas_width = 800
+        canvas_height = 600
+        block_width = 400
+        x = (canvas_width - block_width) / 2
+        y = (canvas_height - 200) / 2
 
         attrs = %{
           "room_id" => room.id,
