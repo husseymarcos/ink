@@ -296,10 +296,10 @@ defmodule Ink.CodeBlocksTest do
 
       map = CodeBlocks.to_map(code_block)
 
-      assert map[:id] == code_block.id
-      assert map[:room_id] == room.id
-      assert map[:language] == "python"
-      assert map[:code] == "print(\"Hello, World!\")"
+      assert map["id"] == code_block.id
+      assert map["room_id"] == room.id
+      assert map["language"] == "python"
+      assert map["code"] == "print(\"Hello, World!\")"
     end
   end
 end

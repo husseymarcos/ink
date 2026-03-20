@@ -3,6 +3,7 @@ defmodule InkWeb.CanvasLive do
 
   alias Ink.Collaboration
   alias Ink.CodeBlocks.CodeBlock
+  alias Ink.RoomState
   import InkWeb.CodeBlockComponents
 
   @palette [
@@ -390,67 +391,45 @@ defmodule InkWeb.CanvasLive do
   def handle_event("code_block_create", _params, socket) do
     room_id = socket.assigns.room_id
 
-    case Collaboration.get_room_by_slug(room_id) do
-      nil ->
+    canvas_width = 800
+    canvas_height = 600
+    block_width = 400
+    x = (canvas_width - block_width) / 2
+    y = (canvas_height - 200) / 2
+
+    attrs = %{
+      "x" => x,
+      "y" => y,
+      "language" => "javascript",
+      "code" => Map.get(CodeBlock.templates(), "javascript", ""),
+      "width" => 400
+    }
+
+    case RoomState.create_code_block(room_id, attrs) do
+      {:ok, code_block_map} ->
+        {:noreply,
+         socket
+         |> assign(:code_blocks, socket.assigns.code_blocks ++ [code_block_map])}
+
+      {:error, _} ->
         {:noreply, socket}
-
-      room ->
-        templates = CodeBlock.templates()
-        template = Map.get(templates, "javascript", "")
-
-        canvas_width = 800
-        canvas_height = 600
-        block_width = 400
-        x = (canvas_width - block_width) / 2
-        y = (canvas_height - 200) / 2
-
-        attrs = %{
-          "room_id" => room.id,
-          "x" => x,
-          "y" => y,
-          "language" => "javascript",
-          "code" => template,
-          "width" => 400
-        }
-
-        case Ink.CodeBlocks.create_code_block(attrs) do
-          {:ok, code_block} ->
-            code_block_map = Ink.CodeBlocks.to_map(code_block)
-            Ink.CanvasStore.put_code_block(room_id, code_block_map)
-
-            {:noreply,
-             socket
-             |> assign(:code_blocks, socket.assigns.code_blocks ++ [code_block_map])}
-
-          {:error, _} ->
-            {:noreply, socket}
-        end
     end
   end
 
   def handle_event("code_block_save", %{"id" => id, "value" => code}, socket) do
     room_id = socket.assigns.room_id
 
-    case Ink.CodeBlocks.get_code_block(id) do
-      nil ->
+    case RoomState.update_code_block(room_id, id, %{"code" => code}) do
+      {:ok, code_block_map} ->
+        updated_blocks =
+          Enum.map(socket.assigns.code_blocks, fn cb ->
+            if cb["id"] == id, do: code_block_map, else: cb
+          end)
+
+        {:noreply, assign(socket, :code_blocks, updated_blocks)}
+
+      {:error, _} ->
         {:noreply, socket}
-
-      code_block ->
-        case Ink.CodeBlocks.update_content(code_block, code) do
-          {:ok, updated} ->
-            code_block_map = Ink.CodeBlocks.to_map(updated)
-            Ink.CanvasStore.update_code_block_in_memory(room_id, code_block_map)
-
-            updated_blocks =
-              Enum.map(socket.assigns.code_blocks, fn cb ->
-                if cb["id"] == id, do: code_block_map, else: cb
-              end)
-
-            {:noreply, assign(socket, :code_blocks, updated_blocks)}
-
-          {:error, _} ->
-            {:noreply, socket}
-        end
     end
   end
 
@@ -484,16 +463,8 @@ defmodule InkWeb.CanvasLive do
       ) do
     room_id = socket.assigns.room_id
 
-    case Ink.CodeBlocks.get_code_block(id) do
-      nil ->
-        {:noreply, socket}
-
-      code_block ->
-        Ink.CodeBlocks.update_output(code_block, output)
-        updated = Ink.CodeBlocks.get_code_block(id)
-        code_block_map = Ink.CodeBlocks.to_map(updated)
-        Ink.CanvasStore.update_code_block_in_memory(room_id, code_block_map)
-
+    case RoomState.update_output(room_id, id, output) do
+      {:ok, code_block_map} ->
         updated_blocks =
           Enum.map(socket.assigns.code_blocks, fn cb ->
             if cb["id"] == id, do: code_block_map, else: cb
@@ -516,6 +487,9 @@ defmodule InkWeb.CanvasLive do
            output: output,
            error: error
          })}
+
+      {:error, _} ->
+        {:noreply, socket}
     end
   end
 
@@ -523,81 +497,55 @@ defmodule InkWeb.CanvasLive do
     %{"id" => id, "language" => language} = params
     room_id = socket.assigns.room_id
 
-    case Ink.CodeBlocks.get_code_block(id) do
-      nil ->
+    case RoomState.change_language(room_id, id, language) do
+      {:ok, code_block_map} ->
+        updated_blocks =
+          Enum.map(socket.assigns.code_blocks, fn cb ->
+            if cb["id"] == id, do: code_block_map, else: cb
+          end)
+
+        {:noreply,
+         socket
+         |> assign(:code_blocks, updated_blocks)
+         |> push_event("code_block_language_changed", code_block_map)}
+
+      {:error, _} ->
         {:noreply, socket}
-
-      code_block ->
-        case Ink.CodeBlocks.update_language(code_block, language) do
-          {:ok, updated} ->
-            code_block_map = Ink.CodeBlocks.to_map(updated)
-            Ink.CanvasStore.update_code_block_in_memory(room_id, code_block_map)
-
-            updated_blocks =
-              Enum.map(socket.assigns.code_blocks, fn cb ->
-                if cb["id"] == id, do: code_block_map, else: cb
-              end)
-
-            {:noreply,
-             socket
-             |> assign(:code_blocks, updated_blocks)
-             |> push_event("code_block_language_changed", code_block_map)}
-
-          {:error, _} ->
-            {:noreply, socket}
-        end
     end
   end
 
   def handle_event("code_block_delete", %{"id" => id}, socket) do
     room_id = socket.assigns.room_id
 
-    case Ink.CodeBlocks.get_code_block(id) do
-      nil ->
+    case RoomState.delete_code_block(room_id, id) do
+      {:ok, _} ->
+        updated_blocks = Enum.reject(socket.assigns.code_blocks, fn cb -> cb["id"] == id end)
+
+        {:noreply,
+         socket
+         |> assign(:code_blocks, updated_blocks)
+         |> assign(:running_blocks, Map.delete(socket.assigns.running_blocks, id))
+         |> assign(:error_blocks, Map.delete(socket.assigns.error_blocks, id))}
+
+      {:error, _} ->
         {:noreply, socket}
-
-      code_block ->
-        case Ink.CodeBlocks.delete_code_block(code_block) do
-          {:ok, _} ->
-            Ink.CanvasStore.remove_code_block(room_id, id)
-
-            updated_blocks = Enum.reject(socket.assigns.code_blocks, fn cb -> cb["id"] == id end)
-
-            {:noreply,
-             socket
-             |> assign(:code_blocks, updated_blocks)
-             |> assign(:running_blocks, Map.delete(socket.assigns.running_blocks, id))
-             |> assign(:error_blocks, Map.delete(socket.assigns.error_blocks, id))}
-
-          {:error, _} ->
-            {:noreply, socket}
-        end
     end
   end
 
   def handle_event("code_block_move", %{"id" => id, "x" => x, "y" => y}, socket) do
     room_id = socket.assigns.room_id
 
-    case Ink.CodeBlocks.get_code_block(id) do
-      nil ->
+    case RoomState.move_code_block(room_id, id, x, y) do
+      {:ok, code_block_map} ->
+        updated_blocks =
+          Enum.map(socket.assigns.code_blocks, fn cb ->
+            if cb["id"] == id, do: code_block_map, else: cb
+          end)
+
+        {:noreply, assign(socket, :code_blocks, updated_blocks)}
+
+      {:error, _} ->
         {:noreply, socket}
-
-      code_block ->
-        case Ink.CodeBlocks.update_position(code_block, x, y) do
-          {:ok, updated} ->
-            code_block_map = Ink.CodeBlocks.to_map(updated)
-            Ink.CanvasStore.update_code_block_in_memory(room_id, code_block_map)
-
-            updated_blocks =
-              Enum.map(socket.assigns.code_blocks, fn cb ->
-                if cb["id"] == id, do: code_block_map, else: cb
-              end)
-
-            {:noreply, assign(socket, :code_blocks, updated_blocks)}
-
-          {:error, _} ->
-            {:noreply, socket}
-        end
     end
   end
 

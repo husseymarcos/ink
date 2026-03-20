@@ -61,18 +61,18 @@ defmodule Ink.CodeBlocks do
 
   def to_map(%CodeBlock{} = cb) do
     %{
-      id: cb.id,
-      room_id: cb.room_id,
-      language: cb.language,
-      code: cb.code,
-      output: cb.output,
-      name: cb.name,
-      x: cb.x,
-      y: cb.y,
-      width: cb.width,
-      z_index: cb.z_index,
-      inserted_at: cb.inserted_at,
-      updated_at: cb.updated_at
+      "id" => cb.id,
+      "room_id" => cb.room_id,
+      "language" => cb.language,
+      "code" => cb.code,
+      "output" => cb.output,
+      "name" => cb.name,
+      "x" => cb.x,
+      "y" => cb.y,
+      "width" => cb.width,
+      "z_index" => cb.z_index,
+      "inserted_at" => cb.inserted_at,
+      "updated_at" => cb.updated_at
     }
   end
 
