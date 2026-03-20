@@ -4,41 +4,45 @@ defmodule InkWeb.UserSessionController do
   alias Ink.Accounts
   alias InkWeb.UserAuth
 
-  plug :redirect_if_user_is_authenticated when action in [:new, :create]
+  def establish(conn, %{"token" => token}) do
+    case UserAuth.verify_session_establish_token(token) do
+      {:ok, user_id, remember, kind} ->
+        case Accounts.get_user(user_id) do
+          nil ->
+            conn
+            |> put_flash(:error, "Invalid or expired session link.")
+            |> redirect(to: ~p"/login")
 
-  def new(conn, _params) do
-    form = Phoenix.Component.to_form(%{}, as: :user)
-    render(conn, :new, form: form)
-  end
+          user ->
+            info =
+              case kind do
+                "register" -> "Account created successfully."
+                _ -> "Welcome back."
+              end
 
-  def create(conn, %{"user" => %{"email" => email, "password" => password}}) do
-    case Accounts.authenticate_user(email, password) do
-      {:ok, user} ->
-        conn
-        |> put_flash(:info, "Bienvenido de vuelta.")
-        |> UserAuth.log_in_user(user)
+            conn
+            |> UserAuth.put_authenticated_session(user, remember: remember)
+            |> put_flash(:info, info)
+            |> redirect(to: ~p"/")
+        end
 
       :error ->
         conn
-        |> put_flash(:error, "Email o password inválidos.")
-        |> render(:new, form: Phoenix.Component.to_form(%{"email" => email}, as: :user))
+        |> put_flash(:error, "Invalid or expired session link.")
+        |> redirect(to: ~p"/login")
     end
+  end
+
+  def establish(conn, _params) do
+    conn
+    |> put_flash(:error, "Invalid or expired session link.")
+    |> redirect(to: ~p"/login")
   end
 
   def delete(conn, _params) do
     conn
     |> UserAuth.log_out_user()
-    |> put_flash(:info, "Sesión cerrada.")
+    |> put_flash(:info, "Signed out.")
     |> redirect(to: ~p"/login")
-  end
-
-  defp redirect_if_user_is_authenticated(conn, _opts) do
-    if conn.assigns.current_user do
-      conn
-      |> redirect(to: ~p"/")
-      |> halt()
-    else
-      conn
-    end
   end
 end

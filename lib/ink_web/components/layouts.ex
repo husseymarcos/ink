@@ -39,7 +39,7 @@ defmodule InkWeb.Layouts do
     ~H"""
     <div class="min-h-screen bg-gradient-to-b from-surface via-surface to-surface-container-low/50">
       <main class="px-4 py-8 sm:px-6 lg:px-12 lg:py-12 xl:py-16">
-        <div class="mx-auto w-full max-w-6xl space-y-6">
+        <div class="mx-auto w-full max-w-7xl space-y-6">
           {render_slot(@inner_block)}
         </div>
       </main>

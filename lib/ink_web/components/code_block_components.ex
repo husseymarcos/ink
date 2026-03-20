@@ -53,7 +53,7 @@ defmodule InkWeb.CodeBlockComponents do
           size={:xs}
           square
           data-copy-btn
-          title="Copiar código"
+          title="Copy code"
         >
           <.icon name="hero-clipboard" class="h-3.5 w-3.5" />
         </.button>
@@ -65,7 +65,7 @@ defmodule InkWeb.CodeBlockComponents do
           square
           class="text-error"
           data-delete-btn
-          title="Eliminar bloque"
+          title="Delete block"
         >
           <.icon name="hero-trash" class="h-3.5 w-3.5" />
         </.button>
@@ -122,7 +122,7 @@ defmodule InkWeb.CodeBlockComponents do
             :if={@running_info}
             class="text-xs text-info"
           >
-            Ejecutando...
+            Running...
           </span>
         </div>
 
@@ -158,8 +158,8 @@ defmodule InkWeb.CodeBlockComponents do
         type="button"
         class="flex cursor-pointer items-center justify-center rounded-lg bg-surface-container-low p-2 text-muted-foreground transition-colors hover:bg-surface-container-highest/80 hover:text-foreground"
         phx-click="code_block_create"
-        title="Crear bloque de código"
-        aria-label="Crear bloque de código"
+        title="Create code block"
+        aria-label="Create code block"
       >
         <.icon name="hero-code-bracket" class="h-4 w-4" />
       </button>
@@ -167,7 +167,7 @@ defmodule InkWeb.CodeBlockComponents do
       <div
         :if={@pyodide_loading}
         class="flex items-center gap-1 rounded-md bg-surface-container-low px-2 py-1 text-xs text-muted-foreground"
-        title="Cargando Python..."
+        title="Loading Python..."
       >
         <span
           class="size-3.5 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent"

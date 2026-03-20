@@ -9,6 +9,7 @@ defmodule Ink.Accounts.User do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "users" do
+    field :name, :string
     field :email, :string
     field :hashed_password, :string
     field :password, :string, virtual: true, redact: true
@@ -21,8 +22,16 @@ defmodule Ink.Accounts.User do
 
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:name, :email, :password])
     |> validate_required([:email, :password])
+    |> update_change(:name, fn
+      n when is_binary(n) ->
+        case String.trim(n) do
+          "" -> nil
+          t -> t
+        end
+    end)
+    |> validate_length(:name, max: 160)
     |> update_change(:email, &(String.trim(&1) |> String.downcase()))
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:password, min: 8, max: 72)

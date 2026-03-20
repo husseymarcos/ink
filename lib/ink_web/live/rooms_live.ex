@@ -13,13 +13,13 @@ defmodule InkWeb.RoomsLive do
       nil ->
         {:ok,
          socket
-         |> put_flash(:error, "Inicia sesión para continuar.")
+         |> put_flash(:error, "Sign in to continue.")
          |> redirect(to: ~p"/login")}
 
       current_user ->
         {:ok,
          socket
-         |> assign(:page_title, "Tus rooms")
+         |> assign(:page_title, "Your rooms")
          |> assign(:current_user, current_user)
          |> assign(:delete_modal_open?, false)
          |> assign(:room_to_delete, nil)
@@ -49,10 +49,10 @@ defmodule InkWeb.RoomsLive do
               Workspace
             </p>
             <h1 class="font-display mt-2 text-3xl font-semibold tracking-[-0.02em] text-foreground sm:text-[2rem]">
-              Tus rooms
+              Your rooms
             </h1>
             <p class="mt-2 max-w-xl text-sm text-muted-foreground">
-              Accede rápidamente a los rooms que creaste y a los que te compartieron.
+              Quickly open rooms you created and ones shared with you.
             </p>
           </div>
 
@@ -62,7 +62,7 @@ defmodule InkWeb.RoomsLive do
                 {@current_user.email}
               </span>
               <span class="text-[11px] text-muted-foreground">
-                Sesión iniciada
+                Signed in
               </span>
             </div>
 
@@ -72,7 +72,7 @@ defmodule InkWeb.RoomsLive do
               class="inline-flex items-center gap-1.5 rounded-lg bg-surface-container-low px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               <.icon name="hero-arrow-left-on-rectangle" class="h-4 w-4" />
-              <span>Cerrar sesión</span>
+              <span>Sign out</span>
             </.link>
           </div>
         </header>
@@ -92,7 +92,7 @@ defmodule InkWeb.RoomsLive do
               class="inline-flex gap-1.5 px-4 py-2 normal-case tracking-normal"
             >
               <.icon name="hero-plus" class="h-4 w-4" />
-              <span>Nuevo room</span>
+              <span>New room</span>
             </.button>
           </div>
 
@@ -101,7 +101,7 @@ defmodule InkWeb.RoomsLive do
               :if={@rooms == []}
               class="col-span-full rounded-xl bg-surface-container-highest/50 px-3 py-6 text-center text-sm text-muted-foreground"
             >
-              Todavía no tienes rooms. Crea uno nuevo o espera a que alguien te comparta uno.
+              You don't have any rooms yet. Create one or wait for someone to share one with you.
             </div>
 
             <div
@@ -163,9 +163,9 @@ defmodule InkWeb.RoomsLive do
                   />
                   <span>
                     <%= if room.kind == :owned do %>
-                      Tu room
+                      Your room
                     <% else %>
-                      Compartido ·
+                      Shared ·
                       <span class="font-mono">
                         {room.owner && room.owner.email}
                       </span>
@@ -182,7 +182,7 @@ defmodule InkWeb.RoomsLive do
                     phx-click="open_share_modal"
                     phx-value-slug={room.slug}
                     class="inline-flex items-center justify-center rounded-full p-1 text-xs text-muted-foreground transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                    title="Compartir room"
+                    title="Share room"
                   >
                     <.icon name="hero-share" class="h-4 w-4" />
                   </button>
@@ -192,7 +192,7 @@ defmodule InkWeb.RoomsLive do
                     phx-click="open_delete_modal"
                     phx-value-slug={room.slug}
                     class="inline-flex items-center justify-center rounded-full p-1 text-xs text-error/90 transition hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/40"
-                    title="Eliminar room"
+                    title="Delete room"
                   >
                     <.icon name="hero-trash" class="h-4 w-4" />
                   </button>
@@ -206,13 +206,13 @@ defmodule InkWeb.RoomsLive do
           :if={@share_modal_open? && @room_to_share}
           class="fixed inset-0 z-40"
           role="dialog"
-          aria-label="Compartir room"
+          aria-label="Share room"
         >
           <button
             type="button"
             phx-click="close_share_modal"
             class="absolute inset-0 h-full w-full bg-black/40"
-            aria-label="Cerrar"
+            aria-label="Close"
           >
           </button>
 
@@ -220,17 +220,17 @@ defmodule InkWeb.RoomsLive do
             <div class="relative overflow-hidden rounded-2xl glass-vellum shadow-ambient outline-ghost">
               <div class="flex items-start justify-between gap-4 bg-surface-container-low/90 px-4 py-3">
                 <div>
-                  <p class="font-display text-sm font-semibold text-foreground">Compartir room</p>
+                  <p class="font-display text-sm font-semibold text-foreground">Share room</p>
                   <p class="text-xs text-muted-foreground">
                     Room: <span class="font-mono">{@room_to_share.name}</span>
-                    · Código: <span class="font-mono">{@room_to_share.slug}</span>
+                    · Code: <span class="font-mono">{@room_to_share.slug}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   phx-click="close_share_modal"
                   class="rounded-lg p-1 text-muted-foreground transition hover:bg-surface-container-highest/80 hover:text-foreground"
-                  aria-label="Cerrar"
+                  aria-label="Close"
                 >
                   <.icon name="hero-x-mark" class="h-5 w-5" />
                 </button>
@@ -247,18 +247,18 @@ defmodule InkWeb.RoomsLive do
                     <.input
                       field={@share_form[:email]}
                       type="email"
-                      label="Compartir por email"
-                      placeholder="persona@email.com"
+                      label="Share by email"
+                      placeholder="someone@email.com"
                       required
                     />
                   </div>
                   <.button type="submit" class="sm:mb-2">
-                    Compartir
+                    Share
                   </.button>
                 </.form>
 
                 <div class="mt-2">
-                  <p class="text-xs font-medium text-muted-foreground">Con acceso:</p>
+                  <p class="text-xs font-medium text-muted-foreground">People with access:</p>
                   <div class="mt-2 flex flex-wrap gap-1.5">
                     <span class="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                       {@current_user.email} (owner)
@@ -280,31 +280,31 @@ defmodule InkWeb.RoomsLive do
           :if={@delete_modal_open? && @room_to_delete}
           class="fixed inset-0 z-40"
           role="dialog"
-          aria-label="Eliminar room"
+          aria-label="Delete room"
         >
           <button
             type="button"
             phx-click="close_delete_modal"
             class="absolute inset-0 h-full w-full bg-black/40"
-            aria-label="Cerrar"
+            aria-label="Close"
           >
           </button>
 
           <div class="absolute inset-x-0 top-20 mx-auto w-[min(30rem,calc(100vw-1.5rem))] px-3">
             <div class="relative overflow-hidden rounded-2xl glass-vellum shadow-ambient outline-ghost">
               <div class="px-4 py-4">
-                <p class="font-display text-sm font-semibold text-foreground">Eliminar room</p>
+                <p class="font-display text-sm font-semibold text-foreground">Delete room</p>
                 <p class="mt-1 text-xs text-muted-foreground">
-                  Estás a punto de eliminar el room
+                  You are about to delete the room
                   <span class="font-mono font-medium text-foreground">
                     {@room_to_delete.name}
                   </span>
-                  ({@room_to_delete.slug}). Esta acción no se puede deshacer.
+                  ({@room_to_delete.slug}). This cannot be undone.
                 </p>
 
                 <div class="mt-4 flex items-center justify-end gap-2">
                   <.button type="button" phx-click="close_delete_modal" variant="secondary" size={:sm}>
-                    Cancelar
+                    Cancel
                   </.button>
 
                   <.button
@@ -314,7 +314,7 @@ defmodule InkWeb.RoomsLive do
                     variant="danger"
                     size={:sm}
                   >
-                    Eliminar
+                    Delete
                   </.button>
                 </div>
               </div>
@@ -361,9 +361,9 @@ defmodule InkWeb.RoomsLive do
     |> Map.put(:online_count, online_count)
   end
 
-  defp online_label(0), do: "Sin personas conectadas"
-  defp online_label(1), do: "1 persona conectada"
-  defp online_label(n), do: "#{n} personas conectadas"
+  defp online_label(0), do: "No one online"
+  defp online_label(1), do: "1 person online"
+  defp online_label(n), do: "#{n} people online"
 
   defp random_slug do
     8
@@ -381,14 +381,14 @@ defmodule InkWeb.RoomsLive do
         {:noreply, push_navigate(socket, to: ~p"/room/#{room.slug}")}
 
       {:error, _error} ->
-        {:noreply, put_flash(socket, :error, "No se pudo crear el room. Inténtalo nuevamente.")}
+        {:noreply, put_flash(socket, :error, "Could not create the room. Please try again.")}
     end
   end
 
   def handle_event("open_delete_modal", %{"slug" => slug}, socket) do
     case Collaboration.get_room_by_slug(slug) do
       nil ->
-        {:noreply, put_flash(socket, :error, "Room no encontrado.")}
+        {:noreply, put_flash(socket, :error, "Room not found.")}
 
       room ->
         {:noreply,
@@ -410,23 +410,23 @@ defmodule InkWeb.RoomsLive do
 
     case Collaboration.get_room_by_slug(slug) do
       nil ->
-        {:noreply, put_flash(socket, :error, "Room no encontrado.")}
+        {:noreply, put_flash(socket, :error, "Room not found.")}
 
       room ->
         case Collaboration.delete_room(room, current_user) do
           {:ok, _room} ->
             {:noreply,
              socket
-             |> put_flash(:info, "Room eliminado.")
+             |> put_flash(:info, "Room deleted.")
              |> assign(:delete_modal_open?, false)
              |> assign(:room_to_delete, nil)
              |> load_rooms(current_user)}
 
           {:error, :not_owner} ->
-            {:noreply, put_flash(socket, :error, "Solo el owner puede eliminar este room.")}
+            {:noreply, put_flash(socket, :error, "Only the owner can delete this room.")}
 
           {:error, _error} ->
-            {:noreply, put_flash(socket, :error, "No se pudo eliminar el room.")}
+            {:noreply, put_flash(socket, :error, "Could not delete the room.")}
         end
     end
   end
@@ -434,7 +434,7 @@ defmodule InkWeb.RoomsLive do
   def handle_event("open_share_modal", %{"slug" => slug}, socket) do
     case Collaboration.get_room_by_slug(slug) do
       nil ->
-        {:noreply, put_flash(socket, :error, "Room no encontrado.")}
+        {:noreply, put_flash(socket, :error, "Room not found.")}
 
       room ->
         {:noreply,
@@ -461,24 +461,24 @@ defmodule InkWeb.RoomsLive do
       {:ok, _membership} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Room compartido con #{email}.")
+         |> put_flash(:info, "Room shared with #{email}.")
          |> assign(:share_form, to_form(%{"email" => ""}, as: :share))
          |> assign(:shared_users, Collaboration.list_room_users(room))}
 
       {:error, :owner_cannot_be_shared} ->
-        {:noreply, put_flash(socket, :error, "El owner ya tiene acceso al room.")}
+        {:noreply, put_flash(socket, :error, "The owner already has access to this room.")}
 
       {:error, :not_owner} ->
-        {:noreply, put_flash(socket, :error, "Solo el owner puede compartir este room.")}
+        {:noreply, put_flash(socket, :error, "Only the owner can share this room.")}
 
       {:error, :user_not_found} ->
-        {:noreply, put_flash(socket, :error, "No existe un usuario con ese email.")}
+        {:noreply, put_flash(socket, :error, "No user exists with that email.")}
 
       {:error, %Ecto.Changeset{}} ->
-        {:noreply, put_flash(socket, :info, "Ese usuario ya tenía acceso.")}
+        {:noreply, put_flash(socket, :info, "That user already had access.")}
 
       _ ->
-        {:noreply, put_flash(socket, :error, "No se pudo compartir el room.")}
+        {:noreply, put_flash(socket, :error, "Could not share the room.")}
     end
   end
 end

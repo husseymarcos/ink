@@ -21,6 +21,9 @@
   --color-outline-variant: #c4c5d7;
   --color-foreground: #1a1628;
   --color-muted-foreground: #5c576b;
+  --color-on-surface-variant: #434655;
+  --color-outline: #747686;
+  --color-surface-variant: #e2e1ed;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --spacing-vellum-12: 3rem;
@@ -123,6 +126,10 @@
 
 .shadow-ambient {
   box-shadow: 0 20px 40px rgb(0 55 176 / 0.06);
+}
+
+.signature-gradient {
+  background: linear-gradient(45deg, #0037b0, #1d4ed8);
 }
 
 .ink-input,

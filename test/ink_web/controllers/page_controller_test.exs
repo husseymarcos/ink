@@ -22,6 +22,6 @@ defmodule InkWeb.PageControllerTest do
       |> get(~p"/")
 
     assert conn.status == 200
-    assert conn.resp_body =~ "Tus rooms"
+    assert conn.resp_body =~ "Your rooms"
   end
 end

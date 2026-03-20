@@ -27,13 +27,22 @@ import {CanvasDraw} from "./hooks/canvas_draw.js"
 import {RoomPreview} from "./hooks/room_preview.js"
 import {AutoDismissFlash} from "./hooks/auto_dismiss_flash.js"
 import {CodeBlock, CodeBlocksContainer} from "./hooks/code_block.js"
+import {PasswordToggle, initPasswordToggles} from "./hooks/password_toggle.js"
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {CanvasDraw, RoomPreview, AutoDismissFlash, CodeBlock, CodeBlocksContainer, ...colocatedHooks},
+  hooks: {
+    CanvasDraw,
+    RoomPreview,
+    AutoDismissFlash,
+    CodeBlock,
+    CodeBlocksContainer,
+    PasswordToggle,
+    ...colocatedHooks,
+  },
 })
 
 // Show progress bar on live navigation and form submits
@@ -50,6 +59,7 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
+document.addEventListener("DOMContentLoaded", initPasswordToggles)
 // The lines below enable quality of life phoenix_live_reload
 // development features:
 //

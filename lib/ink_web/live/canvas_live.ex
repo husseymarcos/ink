@@ -41,7 +41,7 @@ defmodule InkWeb.CanvasLive do
       nil ->
         {:ok,
          socket
-         |> put_flash(:error, "Inicia sesion para continuar.")
+         |> put_flash(:error, "Sign in to continue.")
          |> redirect(to: ~p"/login")}
 
       current_user ->
@@ -65,7 +65,7 @@ defmodule InkWeb.CanvasLive do
             <.link
               navigate={~p"/"}
               class="glass-vellum inline-flex items-center justify-center rounded-full p-1.5 text-sm text-foreground outline-ghost transition hover:bg-surface-container-lowest/90 focus:ring-2 focus:ring-primary/50"
-              aria-label="Volver al dashboard"
+              aria-label="Back to dashboard"
             >
               <.icon name="hero-arrow-left-on-rectangle" class="h-4 w-4" />
             </.link>
@@ -76,7 +76,7 @@ defmodule InkWeb.CanvasLive do
               type="button"
               phx-click="open_room_name"
               class="group inline-flex items-center justify-end gap-1 rounded-md px-1.5 py-0.5 text-sm font-medium text-muted-foreground transition hover:bg-surface-container-low/90 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-              title="Toca para renombrar"
+              title="Click to rename"
             >
               <div class="flex flex-col items-end justify-center leading-tight">
                 <span class="text-sm font-semibold text-foreground">
@@ -91,20 +91,20 @@ defmodule InkWeb.CanvasLive do
               :if={@room_name_modal_open?}
               class="absolute right-0 top-12 w-[22rem] rounded-2xl glass-vellum p-4 shadow-ambient outline-ghost"
               role="dialog"
-              aria-label="Renombrar room"
+              aria-label="Rename room"
             >
               <div class="flex items-start justify-between gap-3">
                 <div>
-                  <p class="font-display text-sm font-semibold text-foreground">Nombre del room</p>
+                  <p class="font-display text-sm font-semibold text-foreground">Room name</p>
                   <p class="text-xs text-muted-foreground">
-                    El código permanece igual: <span class="font-mono">{@room_id}</span>
+                    The room code stays the same: <span class="font-mono">{@room_id}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   phx-click="close_room_name"
                   class="rounded-lg p-1 text-muted-foreground transition hover:bg-surface-container-highest/80 hover:text-foreground"
-                  aria-label="Cerrar"
+                  aria-label="Close"
                 >
                   <.icon name="hero-x-mark" class="h-5 w-5" />
                 </button>
@@ -119,24 +119,24 @@ defmodule InkWeb.CanvasLive do
                 <.input
                   field={@room_name_form[:name]}
                   type="text"
-                  label="Nombre"
+                  label="Name"
                   placeholder={@room_id}
                   required
                 />
 
                 <div class="mt-2 flex items-center justify-end gap-2">
                   <.button type="button" phx-click="close_room_name" variant="secondary" size={:sm}>
-                    Cancelar
+                    Cancel
                   </.button>
                   <.button type="submit" size={:sm}>
-                    Guardar
+                    Save
                   </.button>
                 </div>
               </.form>
 
               <div class="mt-3 flex items-center justify-between gap-2">
                 <p class="text-xs text-muted-foreground">
-                  Solo el owner puede cambiar el nombre del room.
+                  Only the owner can change the room name.
                 </p>
 
                 <button
@@ -145,7 +145,7 @@ defmodule InkWeb.CanvasLive do
                   class="inline-flex items-center justify-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 >
                   <.icon name="hero-share" class="h-3 w-3" />
-                  <span>Compartir</span>
+                  <span>Share</span>
                 </button>
               </div>
             </div>
@@ -156,13 +156,13 @@ defmodule InkWeb.CanvasLive do
           :if={@share_modal_open?}
           class="fixed inset-0 z-40"
           role="dialog"
-          aria-label="Compartir room"
+          aria-label="Share room"
         >
           <button
             type="button"
             phx-click="close_share_modal"
             class="absolute inset-0 h-full w-full bg-black/40"
-            aria-label="Cerrar"
+            aria-label="Close"
           >
           </button>
 
@@ -170,16 +170,16 @@ defmodule InkWeb.CanvasLive do
             <div class="relative overflow-hidden rounded-2xl glass-vellum shadow-ambient outline-ghost">
               <div class="flex items-start justify-between gap-4 bg-surface-container-low/90 px-4 py-3">
                 <div>
-                  <p class="font-display text-sm font-semibold text-foreground">Compartir</p>
+                  <p class="font-display text-sm font-semibold text-foreground">Share</p>
                   <p class="text-xs text-muted-foreground">
-                    Código del room: <span class="font-mono">{@room_id}</span>
+                    Room code: <span class="font-mono">{@room_id}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   phx-click="close_share_modal"
                   class="rounded-lg p-1 text-muted-foreground transition hover:bg-surface-container-highest/80 hover:text-foreground"
-                  aria-label="Cerrar"
+                  aria-label="Close"
                 >
                   <.icon name="hero-x-mark" class="h-5 w-5" />
                 </button>
@@ -196,18 +196,18 @@ defmodule InkWeb.CanvasLive do
                     <.input
                       field={@share_form[:email]}
                       type="email"
-                      label="Compartir por email"
-                      placeholder="persona@email.com"
+                      label="Share by email"
+                      placeholder="someone@email.com"
                       required
                     />
                   </div>
                   <.button type="submit" class="sm:mb-2">
-                    Compartir
+                    Share
                   </.button>
                 </.form>
 
                 <div class="mt-2">
-                  <p class="text-xs font-medium text-muted-foreground">Con acceso:</p>
+                  <p class="text-xs font-medium text-muted-foreground">People with access:</p>
                   <div class="mt-2 flex flex-wrap gap-1.5">
                     <span class="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                       {@current_user.email} (owner)
@@ -347,7 +347,7 @@ defmodule InkWeb.CanvasLive do
          |> put_flash(:info, "Nombre actualizado.")}
 
       {:error, :not_owner} ->
-        {:noreply, put_flash(socket, :error, "Solo el owner puede cambiar el nombre del room.")}
+        {:noreply, put_flash(socket, :error, "Only the owner can change the room name.")}
 
       {:error, %Ecto.Changeset{}} ->
         {:noreply, put_flash(socket, :error, "No se pudo guardar el nombre.")}
@@ -366,24 +366,24 @@ defmodule InkWeb.CanvasLive do
       {:ok, _membership} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Room compartido con #{email}.")
+         |> put_flash(:info, "Room shared with #{email}.")
          |> assign(:share_form, to_form(%{"email" => ""}, as: :share))
          |> assign(:shared_users, Collaboration.list_room_users(socket.assigns.room))}
 
       {:error, :owner_cannot_be_shared} ->
-        {:noreply, put_flash(socket, :error, "El owner ya tiene acceso al room.")}
+        {:noreply, put_flash(socket, :error, "The owner already has access to this room.")}
 
       {:error, :not_owner} ->
-        {:noreply, put_flash(socket, :error, "Solo el owner puede compartir este room.")}
+        {:noreply, put_flash(socket, :error, "Only the owner can share this room.")}
 
       {:error, :user_not_found} ->
-        {:noreply, put_flash(socket, :error, "No existe un usuario con ese email.")}
+        {:noreply, put_flash(socket, :error, "No user exists with that email.")}
 
       {:error, %Ecto.Changeset{}} ->
-        {:noreply, put_flash(socket, :info, "Ese usuario ya tenía acceso.")}
+        {:noreply, put_flash(socket, :info, "That user already had access.")}
 
       _ ->
-        {:noreply, put_flash(socket, :error, "No se pudo compartir el room.")}
+        {:noreply, put_flash(socket, :error, "Could not share the room.")}
     end
   end
 
@@ -702,13 +702,13 @@ defmodule InkWeb.CanvasLive do
       {:error, :forbidden} ->
         {:ok,
          socket
-         |> put_flash(:error, "No tienes acceso a ese room.")
+         |> put_flash(:error, "You don't have access to that room.")
          |> redirect(to: "/room/#{random_slug()}")}
 
       {:error, _} ->
         {:ok,
          socket
-         |> put_flash(:error, "No se pudo abrir el room.")
+         |> put_flash(:error, "Could not open the room.")
          |> redirect(to: "/room/#{random_slug()}")}
     end
   end

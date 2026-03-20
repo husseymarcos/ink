@@ -18,11 +18,17 @@ defmodule InkWeb.Router do
   scope "/", InkWeb do
     pipe_through :browser
 
-    get "/register", UserRegistrationController, :new
-    post "/register", UserRegistrationController, :create
-    get "/login", UserSessionController, :new
-    post "/login", UserSessionController, :create
     delete "/logout", UserSessionController, :delete
+    get "/session/establish", UserSessionController, :establish
+
+    live_session :public_auth,
+      on_mount: [
+        {InkWeb.UserAuth, :mount_current_user},
+        {InkWeb.UserAuth, :redirect_if_user_is_authenticated}
+      ] do
+      live "/login", UserLoginLive
+      live "/register", UserRegistrationLive
+    end
 
     live_session :authenticated,
       on_mount: [{InkWeb.UserAuth, :require_authenticated_user}] do
