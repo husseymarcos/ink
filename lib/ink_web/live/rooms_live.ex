@@ -35,30 +35,33 @@ defmodule InkWeb.RoomsLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={%{}} current_user={@current_user}>
-      <div class="mx-auto flex h-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <header class="flex items-center justify-between gap-4">
-          <div>
-            <div class="mb-3 flex items-center gap-3">
+      <div class="mx-auto flex h-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
+        <header class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div class="min-w-0">
+            <div class="mb-4 flex items-center gap-3">
               <img
                 src={~p"/images/logo.png"}
                 alt="Ink"
                 class="h-16 w-auto object-contain sm:h-20"
               />
             </div>
-            <h1 class="text-lg font-semibold tracking-tight text-base-content sm:text-xl">
+            <p class="text-xs font-semibold uppercase tracking-wider text-tertiary">
+              Workspace
+            </p>
+            <h1 class="font-display mt-2 text-3xl font-semibold tracking-[-0.02em] text-foreground sm:text-[2rem]">
               Tus rooms
             </h1>
-            <p class="mt-1 text-sm text-base-content/70">
+            <p class="mt-2 max-w-xl text-sm text-muted-foreground">
               Accede rápidamente a los rooms que creaste y a los que te compartieron.
             </p>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex shrink-0 items-center gap-3 sm:pt-1">
             <div class="hidden flex-col text-right text-xs sm:flex">
-              <span class="font-medium text-base-content">
+              <span class="font-medium text-foreground">
                 {@current_user.email}
               </span>
-              <span class="text-[11px] text-base-content/60">
+              <span class="text-[11px] text-muted-foreground">
                 Sesión iniciada
               </span>
             </div>
@@ -66,7 +69,7 @@ defmodule InkWeb.RoomsLive do
             <.link
               href={~p"/logout"}
               method="delete"
-              class="inline-flex items-center gap-1.5 rounded-lg border border-base-300 bg-base-100 px-2.5 py-1 text-xs font-medium text-base-content/80 shadow-sm transition hover:border-error/70 hover:bg-error/5 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/60"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-surface-container-low px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               <.icon name="hero-arrow-left-on-rectangle" class="h-4 w-4" />
               <span>Cerrar sesión</span>
@@ -74,42 +77,42 @@ defmodule InkWeb.RoomsLive do
           </div>
         </header>
 
-        <section class="rounded-2xl bg-base-100 p-4 shadow-sm ring-1 ring-base-300/70">
-          <div class="flex items-center justify-between gap-2">
+        <section class="rounded-2xl bg-surface-container-low p-4 sm:p-6">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-2">
-              <h2 class="text-sm font-semibold text-base-content">Rooms</h2>
-              <span class="rounded-full bg-base-200 px-2 py-0.5 text-xs font-medium text-base-content/70">
+              <h2 class="font-display text-sm font-semibold text-foreground">Rooms</h2>
+              <span class="rounded-full bg-surface-container-highest/80 px-2 py-0.5 text-xs font-medium text-muted-foreground">
                 {length(@rooms)} {if length(@rooms) == 1, do: "room", else: "rooms"}
               </span>
             </div>
 
-            <button
+            <.button
               type="button"
               phx-click="create_room"
-              class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-content shadow-sm transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+              class="inline-flex gap-1.5 px-4 py-2 normal-case tracking-normal"
             >
               <.icon name="hero-plus" class="h-4 w-4" />
               <span>Nuevo room</span>
-            </button>
+            </.button>
           </div>
 
-          <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div
               :if={@rooms == []}
-              class="col-span-full rounded-xl border border-dashed border-base-300/80 bg-base-100/60 px-3 py-4 text-center text-xs text-base-content/70"
+              class="col-span-full rounded-xl bg-surface-container-highest/50 px-3 py-6 text-center text-sm text-muted-foreground"
             >
               Todavía no tienes rooms. Crea uno nuevo o espera a que alguien te comparta uno.
             </div>
 
             <div
               :for={room <- @rooms}
-              class="group relative flex flex-col overflow-hidden rounded-2xl border border-base-300/80 bg-base-100/90 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md"
+              class="group relative flex flex-col overflow-hidden rounded-2xl bg-surface-container-lowest transition hover:-translate-y-0.5 hover:bg-white"
             >
               <.link
                 navigate={~p"/room/#{room.slug}"}
                 class="flex flex-1 flex-col"
               >
-                <div class="relative aspect-[4/3] overflow-hidden bg-base-200">
+                <div class="relative aspect-[4/3] overflow-hidden bg-surface-container-low">
                   <canvas
                     id={"room-preview-#{room.slug}"}
                     phx-hook="RoomPreview"
@@ -120,13 +123,16 @@ defmodule InkWeb.RoomsLive do
                   >
                   </canvas>
 
-                  <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-base-100/70 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   </div>
 
-                  <div class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-base-100/95 px-2 py-0.5 text-[11px] font-medium text-base-content/70 shadow-sm ring-1 ring-base-300/80">
+                  <div class="glass-vellum absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground outline-ghost">
                     <span class={[
                       "h-1.5 w-1.5 rounded-full",
-                      if(room.online_count > 0, do: "bg-emerald-400", else: "bg-base-300")
+                      if(room.online_count > 0,
+                        do: "bg-tertiary",
+                        else: "bg-surface-container-highest"
+                      )
                     ]}>
                     </span>
                     <span>{online_label(room.online_count)}</span>
@@ -134,17 +140,17 @@ defmodule InkWeb.RoomsLive do
                 </div>
 
                 <div class="px-3 py-2.5">
-                  <p class="truncate text-sm font-semibold text-base-content">
+                  <p class="truncate font-display text-sm font-semibold text-foreground">
                     {room.name}
                   </p>
-                  <p class="mt-0.5 truncate text-xs font-mono text-base-content/60">
+                  <p class="mt-0.5 truncate text-xs font-mono text-muted-foreground">
                     {room.slug}
                   </p>
                 </div>
               </.link>
 
               <div class="flex items-center justify-between gap-3 px-3 pb-2.5">
-                <div class="inline-flex items-center gap-1.5 rounded-full bg-base-200 px-2 py-0.5 text-[11px] font-medium text-base-content/70">
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-low px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                   <.icon
                     :if={room.kind == :owned}
                     name="hero-user"
@@ -175,7 +181,7 @@ defmodule InkWeb.RoomsLive do
                     type="button"
                     phx-click="open_share_modal"
                     phx-value-slug={room.slug}
-                    class="inline-flex items-center justify-center rounded-full p-1 text-xs text-base-content/70 transition hover:bg-base-200 hover:text-base-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+                    class="inline-flex items-center justify-center rounded-full p-1 text-xs text-muted-foreground transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                     title="Compartir room"
                   >
                     <.icon name="hero-share" class="h-4 w-4" />
@@ -185,7 +191,7 @@ defmodule InkWeb.RoomsLive do
                     type="button"
                     phx-click="open_delete_modal"
                     phx-value-slug={room.slug}
-                    class="inline-flex items-center justify-center rounded-full p-1 text-xs text-red-500/80 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/70"
+                    class="inline-flex items-center justify-center rounded-full p-1 text-xs text-error/90 transition hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/40"
                     title="Eliminar room"
                   >
                     <.icon name="hero-trash" class="h-4 w-4" />
@@ -211,11 +217,11 @@ defmodule InkWeb.RoomsLive do
           </button>
 
           <div class="absolute inset-x-0 top-16 mx-auto w-[min(42rem,calc(100vw-1.5rem))] px-3 sm:top-20">
-            <div class="relative overflow-hidden rounded-2xl bg-base-100 shadow-2xl ring-1 ring-base-300">
-              <div class="flex items-start justify-between gap-4 border-b border-base-200 px-4 py-3">
+            <div class="relative overflow-hidden rounded-2xl glass-vellum shadow-ambient outline-ghost">
+              <div class="flex items-start justify-between gap-4 bg-surface-container-low/90 px-4 py-3">
                 <div>
-                  <p class="text-sm font-semibold text-base-content">Compartir room</p>
-                  <p class="text-xs text-base-content/60">
+                  <p class="font-display text-sm font-semibold text-foreground">Compartir room</p>
+                  <p class="text-xs text-muted-foreground">
                     Room: <span class="font-mono">{@room_to_share.name}</span>
                     · Código: <span class="font-mono">{@room_to_share.slug}</span>
                   </p>
@@ -223,14 +229,14 @@ defmodule InkWeb.RoomsLive do
                 <button
                   type="button"
                   phx-click="close_share_modal"
-                  class="rounded-lg p-1 text-base-content/60 transition hover:bg-base-200 hover:text-base-content"
+                  class="rounded-lg p-1 text-muted-foreground transition hover:bg-surface-container-highest/80 hover:text-foreground"
                   aria-label="Cerrar"
                 >
                   <.icon name="hero-x-mark" class="h-5 w-5" />
                 </button>
               </div>
 
-              <div class="px-4 py-4">
+              <div class="bg-surface-container-lowest/95 px-4 py-4">
                 <.form
                   for={@share_form}
                   id="dashboard-share-room-form"
@@ -246,20 +252,20 @@ defmodule InkWeb.RoomsLive do
                       required
                     />
                   </div>
-                  <button type="submit" class="btn btn-primary sm:mb-2">
+                  <.button type="submit" class="sm:mb-2">
                     Compartir
-                  </button>
+                  </.button>
                 </.form>
 
                 <div class="mt-2">
-                  <p class="text-xs font-medium text-base-content/70">Con acceso:</p>
+                  <p class="text-xs font-medium text-muted-foreground">Con acceso:</p>
                   <div class="mt-2 flex flex-wrap gap-1.5">
-                    <span class="rounded-full bg-primary/10 px-2 py-1 text-xs text-primary">
+                    <span class="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                       {@current_user.email} (owner)
                     </span>
                     <span
                       :for={user <- @shared_users}
-                      class="rounded-full bg-base-200 px-2 py-1 text-xs text-base-content"
+                      class="rounded-full bg-surface-container-low px-2 py-1 text-xs text-foreground"
                     >
                       {user.email}
                     </span>
@@ -285,34 +291,31 @@ defmodule InkWeb.RoomsLive do
           </button>
 
           <div class="absolute inset-x-0 top-20 mx-auto w-[min(30rem,calc(100vw-1.5rem))] px-3">
-            <div class="relative overflow-hidden rounded-2xl bg-base-100 shadow-2xl ring-1 ring-base-300">
+            <div class="relative overflow-hidden rounded-2xl glass-vellum shadow-ambient outline-ghost">
               <div class="px-4 py-4">
-                <p class="text-sm font-semibold text-base-content">Eliminar room</p>
-                <p class="mt-1 text-xs text-base-content/70">
+                <p class="font-display text-sm font-semibold text-foreground">Eliminar room</p>
+                <p class="mt-1 text-xs text-muted-foreground">
                   Estás a punto de eliminar el room
-                  <span class="font-mono font-medium text-base-content">
+                  <span class="font-mono font-medium text-foreground">
                     {@room_to_delete.name}
                   </span>
                   ({@room_to_delete.slug}). Esta acción no se puede deshacer.
                 </p>
 
                 <div class="mt-4 flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    phx-click="close_delete_modal"
-                    class="btn btn-ghost btn-sm"
-                  >
+                  <.button type="button" phx-click="close_delete_modal" variant="secondary" size={:sm}>
                     Cancelar
-                  </button>
+                  </.button>
 
-                  <button
+                  <.button
                     type="button"
                     phx-click="delete_room"
                     phx-value-slug={@room_to_delete.slug}
-                    class="btn btn-error btn-sm"
+                    variant="danger"
+                    size={:sm}
                   >
                     Eliminar
-                  </button>
+                  </.button>
                 </div>
               </div>
             </div>

@@ -37,9 +37,9 @@ defmodule InkWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-b from-base-200/60 via-base-200/20 to-base-100">
-      <main class="px-4 py-8 sm:px-6 lg:px-8">
-        <div class="mx-auto w-full max-w-6xl space-y-4">
+    <div class="min-h-screen bg-gradient-to-b from-surface via-surface to-surface-container-low/50">
+      <main class="px-4 py-8 sm:px-6 lg:px-12 lg:py-12 xl:py-16">
+        <div class="mx-auto w-full max-w-6xl space-y-6">
           {render_slot(@inner_block)}
         </div>
       </main>
@@ -99,8 +99,8 @@ defmodule InkWeb.Layouts do
   """
   def theme_toggle(assigns) do
     ~H"""
-    <div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full">
-      <div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 transition-[left]" />
+    <div class="relative flex flex-row items-center overflow-hidden rounded-full glass-vellum shadow-ambient outline-ghost">
+      <div class="absolute h-full w-1/3 rounded-full bg-surface-container-lowest/90 left-0 transition-[left] [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3" />
 
       <button
         class="flex p-2 cursor-pointer w-1/3"

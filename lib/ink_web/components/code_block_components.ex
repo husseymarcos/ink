@@ -12,7 +12,7 @@ defmodule InkWeb.CodeBlockComponents do
     ~H"""
     <div
       id={"code-block-#{@code_block.id}"}
-      class="code-block absolute rounded-xl bg-base-100 shadow-xl ring-1 ring-base-300 overflow-hidden flex flex-col"
+      class="code-block absolute flex flex-col overflow-hidden rounded-xl bg-surface-container-lowest shadow-ambient outline-ghost"
       data-code-block-id={@code_block.id}
       data-language={@code_block.language}
       style={
@@ -21,22 +21,22 @@ defmodule InkWeb.CodeBlockComponents do
       phx-hook="CodeBlock"
     >
       <div
-        class="code-block-header flex items-center gap-2 px-3 py-2 bg-base-200 border-b border-base-300 cursor-move select-none"
+        class="code-block-header flex cursor-move select-none items-center gap-2 bg-surface-container-low px-3 py-2"
         data-drag-handle
       >
-        <.icon name="hero-bars-3" class="h-4 w-4 text-base-content/40 cursor-move" />
+        <.icon name="hero-bars-3" class="h-4 w-4 cursor-move text-muted-foreground" />
 
         <div class="flex-1 min-w-0">
           <span
             :if={@code_block.name}
-            class="text-xs font-medium text-base-content/80 truncate"
+            class="truncate text-xs font-medium text-muted-foreground"
           >
             {@code_block.name}
           </span>
         </div>
 
         <select
-          class="select select-ghost select-xs w-auto max-w-[100px] text-xs"
+          class="ink-select w-auto max-w-[100px] cursor-pointer rounded-lg border-0 bg-surface-container-low px-2 py-1 text-xs text-foreground"
           name="language"
           phx-change="code_block_language_change"
           phx-value-id={@code_block.id}
@@ -47,23 +47,28 @@ defmodule InkWeb.CodeBlockComponents do
           <option value="python" selected={@code_block.language == "python"}>Python</option>
         </select>
 
-        <button
+        <.button
           type="button"
-          class="btn btn-ghost btn-xs btn-square"
+          variant="secondary"
+          size={:xs}
+          square
           data-copy-btn
           title="Copiar código"
         >
           <.icon name="hero-clipboard" class="h-3.5 w-3.5" />
-        </button>
+        </.button>
 
-        <button
+        <.button
           type="button"
-          class="btn btn-ghost btn-xs btn-square text-error"
+          variant="secondary"
+          size={:xs}
+          square
+          class="text-error"
           data-delete-btn
           title="Eliminar bloque"
         >
           <.icon name="hero-trash" class="h-3.5 w-3.5" />
-        </button>
+        </.button>
       </div>
 
       <div class="flex-1 flex min-h-0">
@@ -82,21 +87,24 @@ defmodule InkWeb.CodeBlockComponents do
         </div>
 
         <div
-          class="output-panel w-48 border-l border-base-300 flex flex-col bg-base-100"
+          class="output-panel flex w-48 flex-col bg-surface-container-low pl-3"
           data-output-panel
         >
-          <div class="px-3 py-2 text-xs font-medium text-base-content/60 border-b border-base-300 flex items-center justify-between">
+          <div class="flex items-center justify-between bg-surface-container-highest/60 px-3 py-2 text-xs font-medium text-muted-foreground">
             <span>Output</span>
             <span
               :if={@running_info}
               class="text-info flex items-center gap-1"
             >
-              <span class="loading loading-spinner loading-xs"></span>
+              <span
+                class="size-3.5 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent"
+                aria-hidden="true"
+              />
               {@running_info.email}
             </span>
           </div>
           <div
-            class="flex-1 overflow-auto p-3 font-mono text-xs text-base-content"
+            class="flex-1 overflow-auto p-3 font-mono text-xs text-foreground"
             data-output-content
           >
             <%= if @error do %>
@@ -108,7 +116,7 @@ defmodule InkWeb.CodeBlockComponents do
         </div>
       </div>
 
-      <div class="code-block-footer flex items-center justify-between px-3 py-2 bg-base-200 border-t border-base-300">
+      <div class="code-block-footer flex items-center justify-between bg-surface-container-low px-3 py-2">
         <div class="flex items-center gap-2">
           <span
             :if={@running_info}
@@ -118,9 +126,10 @@ defmodule InkWeb.CodeBlockComponents do
           </span>
         </div>
 
-        <button
+        <.button
           type="button"
-          class="btn btn-primary btn-sm gap-1"
+          size={:sm}
+          class="gap-1"
           data-run-btn
           disabled={@running_info}
           phx-click="code_block_run"
@@ -128,11 +137,11 @@ defmodule InkWeb.CodeBlockComponents do
         >
           <.icon name="hero-play" class="h-3.5 w-3.5" />
           <span>Run</span>
-        </button>
+        </.button>
       </div>
 
       <div
-        class="resize-handle absolute right-0 top-1/2 -translate-y-1/2 w-2 h-12 bg-base-300/50 hover:bg-base-300 cursor-ew-resize opacity-0 hover:opacity-100 transition-opacity"
+        class="resize-handle absolute right-0 top-1/2 h-12 w-2 -translate-y-1/2 cursor-ew-resize bg-surface-container-highest/80 opacity-0 transition-opacity hover:bg-surface-container-highest hover:opacity-100"
         data-resize-handle
       >
       </div>
@@ -147,7 +156,7 @@ defmodule InkWeb.CodeBlockComponents do
     <div class="flex items-center gap-2">
       <button
         type="button"
-        class="flex items-center justify-center rounded-lg bg-base-200 p-2 text-base-content/80 cursor-pointer hover:bg-base-300 transition-colors"
+        class="flex cursor-pointer items-center justify-center rounded-lg bg-surface-container-low p-2 text-muted-foreground transition-colors hover:bg-surface-container-highest/80 hover:text-foreground"
         phx-click="code_block_create"
         title="Crear bloque de código"
         aria-label="Crear bloque de código"
@@ -157,10 +166,13 @@ defmodule InkWeb.CodeBlockComponents do
 
       <div
         :if={@pyodide_loading}
-        class="flex items-center gap-1 rounded-md bg-base-200 px-2 py-1 text-xs text-base-content/60"
+        class="flex items-center gap-1 rounded-md bg-surface-container-low px-2 py-1 text-xs text-muted-foreground"
         title="Cargando Python..."
       >
-        <span class="loading loading-spinner loading-xs"></span>
+        <span
+          class="size-3.5 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent"
+          aria-hidden="true"
+        />
         <span>Python</span>
       </div>
     </div>

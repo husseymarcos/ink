@@ -6,90 +6,31 @@
 @source "../js";
 @source "../../lib/ink_web";
 
+@theme {
+  --color-surface: #faf8ff;
+  --color-surface-container-low: #f3f2fe;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-highest: #e2e1ed;
+  --color-surface-tint: rgb(0 55 176 / 0.08);
+  --color-primary: #1d4ed8;
+  --color-primary-deep: #0037b0;
+  --color-on-primary: #ffffff;
+  --color-tertiary: #790088;
+  --color-tertiary-container: #a000b3;
+  --color-on-tertiary: #ffffff;
+  --color-outline-variant: #c4c5d7;
+  --color-foreground: #1a1628;
+  --color-muted-foreground: #5c576b;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --spacing-vellum-12: 3rem;
+  --spacing-vellum-16: 4rem;
+  --shadow-ambient: 0 20px 40px rgb(0 55 176 / 0.06);
+}
+
 /* A Tailwind plugin that makes "hero-#{ICON}" classes available.
    The heroicons installation itself is managed by your mix.exs */
 @plugin "../vendor/heroicons";
-
-/* daisyUI Tailwind Plugin. You can update this file by fetching the latest version with:
-   curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui.js
-   Make sure to look at the daisyUI changelog: https://daisyui.com/docs/changelog/ */
-@plugin "../vendor/daisyui" {
-  themes: false;
-}
-
-/* daisyUI theme plugin. You can update this file by fetching the latest version with:
-  curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui-theme.js
-  We ship with two themes, a light one inspired on Phoenix colors and a dark one inspired
-  on Elixir colors. Build your own at: https://daisyui.com/theme-generator/ */
-@plugin "../vendor/daisyui-theme" {
-  name: "dark";
-  default: false;
-  prefersdark: true;
-  color-scheme: "dark";
-  --color-base-100: oklch(30.33% 0.016 252.42);
-  --color-base-200: oklch(25.26% 0.014 253.1);
-  --color-base-300: oklch(20.15% 0.012 254.09);
-  --color-base-content: oklch(97.807% 0.029 256.847);
-  --color-primary: oklch(58% 0.233 277.117);
-  --color-primary-content: oklch(96% 0.018 272.314);
-  --color-secondary: oklch(58% 0.233 277.117);
-  --color-secondary-content: oklch(96% 0.018 272.314);
-  --color-accent: oklch(60% 0.25 292.717);
-  --color-accent-content: oklch(96% 0.016 293.756);
-  --color-neutral: oklch(37% 0.044 257.287);
-  --color-neutral-content: oklch(98% 0.003 247.858);
-  --color-info: oklch(58% 0.158 241.966);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(60% 0.118 184.704);
-  --color-success-content: oklch(98% 0.014 180.72);
-  --color-warning: oklch(66% 0.179 58.318);
-  --color-warning-content: oklch(98% 0.022 95.277);
-  --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
-  --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.21875rem;
-  --size-field: 0.21875rem;
-  --border: 1.5px;
-  --depth: 1;
-  --noise: 0;
-}
-
-@plugin "../vendor/daisyui-theme" {
-  name: "light";
-  default: true;
-  prefersdark: false;
-  color-scheme: "light";
-  --color-base-100: oklch(100% 0 0);
-  --color-base-200: oklch(97.466% 0.011 259.822);
-  --color-base-300: oklch(93.268% 0.016 262.751);
-  --color-base-content: oklch(41.886% 0.053 255.824);
-  --color-primary: oklch(56.86% 0.255 257.57);
-  --color-primary-content: oklch(91.372% 0.051 257.57);
-  --color-secondary: oklch(42.551% 0.161 282.339);
-  --color-secondary-content: oklch(88.51% 0.032 282.339);
-  --color-accent: oklch(59.939% 0.191 335.171);
-  --color-accent-content: oklch(11.988% 0.038 335.171);
-  --color-neutral: oklch(19.616% 0.063 257.651);
-  --color-neutral-content: oklch(83.923% 0.012 257.651);
-  --color-info: oklch(88.127% 0.085 214.515);
-  --color-info-content: oklch(17.625% 0.017 214.515);
-  --color-success: oklch(80.494% 0.077 197.823);
-  --color-success-content: oklch(16.098% 0.015 197.823);
-  --color-warning: oklch(89.172% 0.045 71.47);
-  --color-warning-content: oklch(17.834% 0.009 71.47);
-  --color-error: oklch(73.092% 0.11 20.076);
-  --color-error-content: oklch(14.618% 0.022 20.076);
-  --radius-selector: 1rem;
-  --radius-field: 0.5rem;
-  --radius-box: 1rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 0;
-  --noise: 0;
-}
 
 /* Add variants based on LiveView classes */
 @custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
@@ -172,5 +113,49 @@
 .hljs-selector-tag { color: oklch(75% 0.15 340); }
 .hljs-selector-class { color: oklch(70% 0.15 180); }
 .hljs-meta { color: oklch(50% 0 0); }
+
+/* Editorial Vellum — primitives (no @apply; see DESIGN.md) */
+.glass-vellum {
+  background-color: rgb(243 242 254 / 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.shadow-ambient {
+  box-shadow: 0 20px 40px rgb(0 55 176 / 0.06);
+}
+
+.ink-input,
+.ink-textarea,
+.ink-select {
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  color: #1a1628;
+  border: none;
+  border-bottom: 2px solid transparent;
+  box-shadow: none;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ink-input:focus,
+.ink-textarea:focus,
+.ink-select:focus {
+  border-bottom-color: #0037b0;
+  box-shadow: 0 0 0 3px rgb(0 55 176 / 0.12);
+  outline: none;
+}
+
+.ink-input-error,
+.ink-textarea-error,
+.ink-select-error {
+  border-bottom-color: rgb(220 38 38 / 0.85);
+}
+
+.outline-ghost {
+  outline: 1px solid rgb(196 197 215 / 0.15);
+}
 
 /* This file is for your main application CSS */

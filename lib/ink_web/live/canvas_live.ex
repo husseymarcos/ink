@@ -59,12 +59,12 @@ defmodule InkWeb.CanvasLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={%{}} current_user={@current_user}>
-      <div class="fixed inset-0 z-50 flex flex-col bg-base-100" data-canvas-container>
+      <div class="fixed inset-0 z-50 flex flex-col bg-surface" data-canvas-container>
         <div class="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between p-3">
           <div class="pointer-events-auto">
             <.link
               navigate={~p"/"}
-              class="inline-flex items-center justify-center rounded-full p-1.5 text-sm text-base-content transition hover:bg-base-200 focus:ring-2 focus:ring-primary"
+              class="glass-vellum inline-flex items-center justify-center rounded-full p-1.5 text-sm text-foreground outline-ghost transition hover:bg-surface-container-lowest/90 focus:ring-2 focus:ring-primary/50"
               aria-label="Volver al dashboard"
             >
               <.icon name="hero-arrow-left-on-rectangle" class="h-4 w-4" />
@@ -75,11 +75,11 @@ defmodule InkWeb.CanvasLive do
             <button
               type="button"
               phx-click="open_room_name"
-              class="group inline-flex items-center justify-end gap-1 rounded-md px-1.5 py-0.5 text-sm font-medium text-base-content/80 transition hover:text-base-content hover:bg-base-200/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+              class="group inline-flex items-center justify-end gap-1 rounded-md px-1.5 py-0.5 text-sm font-medium text-muted-foreground transition hover:bg-surface-container-low/90 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               title="Toca para renombrar"
             >
               <div class="flex flex-col items-end justify-center leading-tight">
-                <span class="text-sm font-semibold text-base-content">
+                <span class="text-sm font-semibold text-foreground">
                   <span class="font-mono">
                     {if @room, do: @room.name, else: @room_id}
                   </span>
@@ -89,21 +89,21 @@ defmodule InkWeb.CanvasLive do
 
             <div
               :if={@room_name_modal_open?}
-              class="absolute right-0 top-12 w-[22rem] rounded-2xl bg-base-100 p-4 shadow-xl ring-1 ring-base-300"
+              class="absolute right-0 top-12 w-[22rem] rounded-2xl glass-vellum p-4 shadow-ambient outline-ghost"
               role="dialog"
               aria-label="Renombrar room"
             >
               <div class="flex items-start justify-between gap-3">
                 <div>
-                  <p class="text-sm font-semibold text-base-content">Nombre del room</p>
-                  <p class="text-xs text-base-content/60">
+                  <p class="font-display text-sm font-semibold text-foreground">Nombre del room</p>
+                  <p class="text-xs text-muted-foreground">
                     El código permanece igual: <span class="font-mono">{@room_id}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   phx-click="close_room_name"
-                  class="rounded-lg p-1 text-base-content/60 transition hover:bg-base-200 hover:text-base-content"
+                  class="rounded-lg p-1 text-muted-foreground transition hover:bg-surface-container-highest/80 hover:text-foreground"
                   aria-label="Cerrar"
                 >
                   <.icon name="hero-x-mark" class="h-5 w-5" />
@@ -125,28 +125,24 @@ defmodule InkWeb.CanvasLive do
                 />
 
                 <div class="mt-2 flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    phx-click="close_room_name"
-                    class="btn btn-ghost btn-sm"
-                  >
+                  <.button type="button" phx-click="close_room_name" variant="secondary" size={:sm}>
                     Cancelar
-                  </button>
-                  <button type="submit" class="btn btn-primary btn-sm">
+                  </.button>
+                  <.button type="submit" size={:sm}>
                     Guardar
-                  </button>
+                  </.button>
                 </div>
               </.form>
 
               <div class="mt-3 flex items-center justify-between gap-2">
-                <p class="text-xs text-base-content/60">
+                <p class="text-xs text-muted-foreground">
                   Solo el owner puede cambiar el nombre del room.
                 </p>
 
                 <button
                   type="button"
                   phx-click="open_share_modal"
-                  class="inline-flex items-center justify-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-base-content/80 transition hover:text-base-content hover:bg-base-200/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+                  class="inline-flex items-center justify-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 >
                   <.icon name="hero-share" class="h-3 w-3" />
                   <span>Compartir</span>
@@ -171,25 +167,25 @@ defmodule InkWeb.CanvasLive do
           </button>
 
           <div class="absolute inset-x-0 top-16 mx-auto w-[min(42rem,calc(100vw-1.5rem))] px-3 sm:top-20">
-            <div class="relative overflow-hidden rounded-2xl bg-base-100 shadow-2xl ring-1 ring-base-300">
-              <div class="flex items-start justify-between gap-4 border-b border-base-200 px-4 py-3">
+            <div class="relative overflow-hidden rounded-2xl glass-vellum shadow-ambient outline-ghost">
+              <div class="flex items-start justify-between gap-4 bg-surface-container-low/90 px-4 py-3">
                 <div>
-                  <p class="text-sm font-semibold text-base-content">Compartir</p>
-                  <p class="text-xs text-base-content/60">
+                  <p class="font-display text-sm font-semibold text-foreground">Compartir</p>
+                  <p class="text-xs text-muted-foreground">
                     Código del room: <span class="font-mono">{@room_id}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   phx-click="close_share_modal"
-                  class="rounded-lg p-1 text-base-content/60 transition hover:bg-base-200 hover:text-base-content"
+                  class="rounded-lg p-1 text-muted-foreground transition hover:bg-surface-container-highest/80 hover:text-foreground"
                   aria-label="Cerrar"
                 >
                   <.icon name="hero-x-mark" class="h-5 w-5" />
                 </button>
               </div>
 
-              <div class="px-4 py-4">
+              <div class="bg-surface-container-lowest/95 px-4 py-4">
                 <.form
                   for={@share_form}
                   id="share-room-form"
@@ -205,20 +201,20 @@ defmodule InkWeb.CanvasLive do
                       required
                     />
                   </div>
-                  <button type="submit" class="btn btn-primary sm:mb-2">
+                  <.button type="submit" class="sm:mb-2">
                     Compartir
-                  </button>
+                  </.button>
                 </.form>
 
                 <div class="mt-2">
-                  <p class="text-xs font-medium text-base-content/70">Con acceso:</p>
+                  <p class="text-xs font-medium text-muted-foreground">Con acceso:</p>
                   <div class="mt-2 flex flex-wrap gap-1.5">
-                    <span class="rounded-full bg-primary/10 px-2 py-1 text-xs text-primary">
+                    <span class="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                       {@current_user.email} (owner)
                     </span>
                     <span
                       :for={user <- @shared_users}
-                      class="rounded-full bg-base-200 px-2 py-1 text-xs text-base-content"
+                      class="rounded-full bg-surface-container-low px-2 py-1 text-xs text-foreground"
                     >
                       {user.email}
                     </span>
@@ -231,14 +227,17 @@ defmodule InkWeb.CanvasLive do
 
         <div
           :if={@pyodide_loading}
-          class="pointer-events-auto fixed left-4 top-4 z-40 flex items-center gap-2 rounded-lg bg-base-100 px-3 py-2 shadow-lg ring-1 ring-base-300"
+          class="pointer-events-auto fixed left-4 top-4 z-40 flex items-center gap-2 rounded-lg glass-vellum px-3 py-2 shadow-ambient outline-ghost"
         >
-          <span class="loading loading-spinner loading-sm text-primary"></span>
-          <span class="text-xs text-base-content/70">Cargando Python...</span>
+          <span
+            class="size-5 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent"
+            aria-hidden="true"
+          />
+          <span class="text-xs text-muted-foreground">Cargando Python...</span>
         </div>
 
         <div
-          class="absolute inset-0 bg-base-100"
+          class="absolute inset-0 bg-surface"
           id="canvas-wrapper"
           data-strokes-above={@strokes_above}
         >
@@ -276,7 +275,7 @@ defmodule InkWeb.CanvasLive do
 
         <div class="pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex justify-center p-3">
           <div
-            class="flex items-center justify-between gap-3 rounded-xl bg-base-100/95 p-2 shadow-lg shadow-black/10 backdrop-blur-sm"
+            class="flex items-center justify-between gap-3 rounded-xl glass-vellum p-2 shadow-ambient outline-ghost"
             role="group"
             aria-label="Paleta de colores"
           >
@@ -287,9 +286,9 @@ defmodule InkWeb.CanvasLive do
                   phx-click="select_color"
                   phx-value-color={color}
                   class={[
-                    "h-8 w-8 shrink-0 rounded-lg border-2 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-base-100",
+                    "h-8 w-8 shrink-0 rounded-lg border-2 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface",
                     if(@current_color == color,
-                      do: "scale-110 border-base-content shadow-md",
+                      do: "scale-110 border-foreground/30 shadow-md",
                       else: "border-transparent hover:scale-105 hover:shadow"
                     )
                   ]}

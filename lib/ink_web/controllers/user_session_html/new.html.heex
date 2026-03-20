@@ -1,15 +1,18 @@
 <Layouts.app flash={@flash} current_user={@current_user}>
-  <div class="flex min-h-[70vh] flex-col items-center justify-center gap-6">
+  <div class="flex min-h-[70vh] flex-col items-center justify-center gap-8 px-2">
     <div class="text-center">
       <img
         src={~p"/images/logo.png"}
         alt="Ink"
         class="mx-auto h-20 w-auto object-contain sm:h-24"
       />
-      <p class="mt-2 text-sm text-base-content/70">Inicia sesion para continuar</p>
+      <p class="mt-2 font-display text-2xl font-semibold tracking-[-0.02em] text-foreground sm:text-3xl">
+        Bienvenido
+      </p>
+      <p class="mt-2 text-sm text-muted-foreground">Inicia sesión para continuar</p>
     </div>
 
-    <div class="mx-auto w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+    <div class="mx-auto w-full max-w-md rounded-2xl bg-surface-container-low p-6 sm:p-8">
       <.form for={@form} id="login-form" action={~p"/login"} method="post" class="space-y-4">
         <.input field={@form[:email]} type="email" label="Email" autocomplete="username" required />
         <.input
@@ -20,14 +23,14 @@
           required
         />
 
-        <button type="submit" class="btn btn-primary w-full">
+        <.button type="submit" class="w-full">
           Entrar
-        </button>
+        </.button>
       </.form>
 
-      <p class="mt-4 text-center text-sm text-base-content/70">
+      <p class="mt-6 text-center text-sm text-muted-foreground">
         ¿No tienes cuenta?
-        <.link href={~p"/register"} class="font-medium text-primary hover:text-primary/80">
+        <.link href={~p"/register"} class="font-semibold text-primary hover:text-primary-deep">
           Crear cuenta
         </.link>
       </p>

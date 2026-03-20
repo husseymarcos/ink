@@ -8,12 +8,9 @@ defmodule InkWeb.CoreComponents do
   with doc strings and declarative assigns. You may customize and style
   them in any way you want, based on your application growth and needs.
 
-  The foundation for styling is Tailwind CSS, a utility-first CSS framework,
-  augmented with daisyUI, a Tailwind CSS plugin that provides UI components
-  and themes. Here are useful references:
-
-    * [daisyUI](https://daisyui.com/docs/intro/) - a good place to get
-      started and see the available components.
+  The foundation for styling is Tailwind CSS, a utility-first CSS framework.
+  Button styles live on `<.button>` in this module; inputs use `ink-*` classes in
+  `assets/css/app.css`. References:
 
     * [Tailwind CSS](https://tailwindcss.com) - the foundational framework
       we build on. You will use it for layout, sizing, flexbox, grid, and
@@ -65,13 +62,13 @@ defmodule InkWeb.CoreComponents do
       phx-hook="AutoDismissFlash"
       data-timeout="4500"
       role="alert"
-      class="toast toast-top toast-center z-50"
+      class="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4"
       {@rest}
     >
       <div class={[
-        "alert w-80 sm:w-96 max-w-80 sm:max-w-96 text-wrap",
-        @kind == :info && "alert-info",
-        @kind == :error && "alert-error"
+        "pointer-events-auto flex w-full max-w-[20rem] flex-row items-start gap-3 rounded-2xl border-0 p-4 text-wrap sm:max-w-[24rem] glass-vellum shadow-ambient outline-ghost",
+        @kind == :info && "text-foreground",
+        @kind == :error && "text-error"
       ]}>
         <.icon :if={@kind == :info} name="hero-information-circle" class="size-5 shrink-0" />
         <.icon :if={@kind == :error} name="hero-exclamation-circle" class="size-5 shrink-0" />
@@ -97,28 +94,31 @@ defmodule InkWeb.CoreComponents do
       <.button phx-click="go" variant="primary">Send!</.button>
       <.button navigate={~p"/"}>Home</.button>
   """
-  attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
-  attr :class, :any
-  attr :variant, :string, values: ~w(primary)
+  attr :rest, :global, include: ~w(
+        href navigate patch replace method download name value type disabled
+        phx-click phx-submit phx-target phx-disable-with phx-hook phx-change phx-blur
+        phx-value-id phx-value-slug form id role title aria-label
+      ) ++ [:"data-copy-btn", :"data-delete-btn", :"data-run-btn"]
+
+  attr :class, :any, default: nil
+  attr :variant, :string, default: "primary", values: ~w(primary secondary tertiary danger)
+  attr :size, :atom, default: :md, values: [:md, :sm, :xs]
+  attr :square, :boolean, default: false
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
-    variants = %{"primary" => "btn-primary", nil => "btn-primary btn-soft"}
-
     assigns =
-      assign_new(assigns, :class, fn ->
-        ["btn", Map.fetch!(variants, assigns[:variant])]
-      end)
+      assign(assigns, :class_list, button_class_list(assigns))
 
     if rest[:href] || rest[:navigate] || rest[:patch] do
       ~H"""
-      <.link class={@class} {@rest}>
+      <.link class={@class_list} {@rest}>
         {render_slot(@inner_block)}
       </.link>
       """
     else
       ~H"""
-      <button class={@class} {@rest}>
+      <button class={@class_list} {@rest}>
         {render_slot(@inner_block)}
       </button>
       """
@@ -230,7 +230,7 @@ defmodule InkWeb.CoreComponents do
             name={@name}
             value="true"
             checked={@checked}
-            class={@class || "checkbox checkbox-sm"}
+            class={[@class || "checkbox checkbox-primary checkbox-sm rounded-md"]}
             {@rest}
           />{@label}
         </span>
@@ -244,11 +244,19 @@ defmodule InkWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span
+          :if={@label}
+          class="mb-1 block text-xs font-semibold uppercase tracking-wider text-tertiary"
+        >
+          {@label}
+        </span>
         <select
           id={@id}
           name={@name}
-          class={[@class || "w-full select", @errors != [] && (@error_class || "select-error")]}
+          class={[
+            @class || "w-full ink-select px-3 py-2.5 text-sm",
+            @errors != [] && (@error_class || "ink-select-error")
+          ]}
           multiple={@multiple}
           {@rest}
         >
@@ -265,13 +273,18 @@ defmodule InkWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span
+          :if={@label}
+          class="mb-1 block text-xs font-semibold uppercase tracking-wider text-tertiary"
+        >
+          {@label}
+        </span>
         <textarea
           id={@id}
           name={@name}
           class={[
-            @class || "w-full textarea",
-            @errors != [] && (@error_class || "textarea-error")
+            @class || "w-full ink-textarea px-3 py-2.5 text-sm min-h-[6rem]",
+            @errors != [] && (@error_class || "ink-textarea-error")
           ]}
           {@rest}
         >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
@@ -286,15 +299,20 @@ defmodule InkWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span
+          :if={@label}
+          class="mb-1 block text-xs font-semibold uppercase tracking-wider text-tertiary"
+        >
+          {@label}
+        </span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           class={[
-            @class || "w-full input",
-            @errors != [] && (@error_class || "input-error")
+            @class || "w-full ink-input px-3 py-2.5 text-sm",
+            @errors != [] && (@error_class || "ink-input-error")
           ]}
           {@rest}
         />
@@ -307,7 +325,7 @@ defmodule InkWeb.CoreComponents do
   # Helper used by inputs to generate form errors
   defp error(assigns) do
     ~H"""
-    <p class="mt-1.5 flex gap-2 items-center text-sm text-error">
+    <p class="mt-1.5 flex gap-2 items-center text-sm text-error font-sans">
       <.icon name="hero-exclamation-circle" class="size-5" />
       {render_slot(@inner_block)}
     </p>
@@ -323,16 +341,16 @@ defmodule InkWeb.CoreComponents do
 
   def header(assigns) do
     ~H"""
-    <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
-      <div>
-        <h1 class="text-lg font-semibold leading-8">
+    <header class={[@actions != [] && "flex items-start justify-between gap-8", "pb-6"]}>
+      <div class="min-w-0">
+        <h1 class="font-display text-2xl font-semibold tracking-[-0.02em] text-foreground sm:text-[2rem] sm:leading-tight">
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="text-sm text-base-content/70">
+        <p :if={@subtitle != []} class="mt-2 text-sm text-muted-foreground font-sans">
           {render_slot(@subtitle)}
         </p>
       </div>
-      <div class="flex-none">{render_slot(@actions)}</div>
+      <div class="flex-none shrink-0">{render_slot(@actions)}</div>
     </header>
     """
   end
@@ -369,21 +387,30 @@ defmodule InkWeb.CoreComponents do
       end
 
     ~H"""
-    <table class="table table-zebra">
+    <table class="table w-full border-separate border-spacing-y-2">
       <thead>
         <tr>
-          <th :for={col <- @col}>{col[:label]}</th>
-          <th :if={@action != []}>
+          <th
+            :for={col <- @col}
+            class="pb-2 text-left text-xs font-semibold uppercase tracking-wider text-tertiary"
+          >
+            {col[:label]}
+          </th>
+          <th :if={@action != []} class="pb-2">
             <span class="sr-only">{gettext("Actions")}</span>
           </th>
         </tr>
       </thead>
       <tbody id={@id} phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}>
-        <tr :for={row <- @rows} id={@row_id && @row_id.(row)}>
+        <tr
+          :for={row <- @rows}
+          class="odd:bg-surface even:bg-surface-container-low/90"
+          id={@row_id && @row_id.(row)}
+        >
           <td
             :for={col <- @col}
             phx-click={@row_click && @row_click.(row)}
-            class={@row_click && "hover:cursor-pointer"}
+            class={["px-3 py-2.5 text-sm text-foreground", @row_click && "hover:cursor-pointer"]}
           >
             {render_slot(col, @row_item.(row))}
           </td>
@@ -416,12 +443,13 @@ defmodule InkWeb.CoreComponents do
 
   def list(assigns) do
     ~H"""
-    <ul class="list">
-      <li :for={item <- @item} class="list-row">
-        <div class="list-col-grow">
-          <div class="font-bold">{item.title}</div>
-          <div>{render_slot(item)}</div>
-        </div>
+    <ul class="flex flex-col gap-2">
+      <li
+        :for={item <- @item}
+        class="rounded-xl bg-surface-container-low px-4 py-3 transition hover:bg-surface-container-highest/80"
+      >
+        <div class="font-display text-sm font-semibold text-foreground">{item.title}</div>
+        <div class="mt-1 text-sm text-muted-foreground font-sans">{render_slot(item)}</div>
       </li>
     </ul>
     """
@@ -504,4 +532,67 @@ defmodule InkWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  defp button_class_list(%{
+         variant: variant,
+         size: size,
+         square: square,
+         class: extra
+       }) do
+    [
+      button_base_classes(),
+      button_variant_classes(variant),
+      button_size_classes(size, square),
+      List.wrap(extra)
+    ]
+    |> List.flatten()
+    |> Enum.reject(&is_nil/1)
+  end
+
+  defp button_base_classes do
+    [
+      "inline-flex shrink-0 flex-nowrap items-center justify-center gap-1.5",
+      "cursor-pointer border-0 text-center align-middle font-semibold",
+      "outline-offset-2 select-none rounded-full",
+      "transition-[color,background-color,border-color,box-shadow,filter] duration-200 ease-out",
+      "focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-deep focus-visible:outline-offset-2",
+      "disabled:pointer-events-none disabled:opacity-45"
+    ]
+  end
+
+  defp button_variant_classes("primary") do
+    [
+      "bg-[linear-gradient(45deg,#0037b0,#1d4ed8)] text-on-primary uppercase tracking-wider text-xs",
+      "hover:brightness-[1.03]"
+    ]
+  end
+
+  defp button_variant_classes("secondary") do
+    [
+      "bg-transparent text-primary font-semibold uppercase tracking-widest text-xs",
+      "hover:bg-primary/10"
+    ]
+  end
+
+  defp button_variant_classes("tertiary") do
+    [
+      "border-0 bg-tertiary-container text-on-tertiary font-semibold uppercase tracking-widest text-xs",
+      "hover:brightness-105"
+    ]
+  end
+
+  defp button_variant_classes("danger") do
+    [
+      "border-0 bg-red-600 text-white uppercase tracking-wider text-xs",
+      "hover:brightness-[1.03]"
+    ]
+  end
+
+  defp button_size_classes(:md, false), do: ["min-h-10 px-4 text-xs"]
+  defp button_size_classes(:sm, false), do: ["min-h-8 px-3 text-xs"]
+  defp button_size_classes(:xs, false), do: ["min-h-6 px-2 text-[0.6875rem] leading-4"]
+
+  defp button_size_classes(:md, true), do: ["size-10 min-h-0 p-0"]
+  defp button_size_classes(:sm, true), do: ["size-8 min-h-0 p-0"]
+  defp button_size_classes(:xs, true), do: ["size-7 min-h-0 p-0"]
 end
